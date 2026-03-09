@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.text.style.TextAlign
+import kotlinx.coroutines.delay
 
 private val OliveGreen = Color(0xFF4A5C2F)
 private val GoldYellow = Color(0xFFC8962A)
@@ -63,8 +64,17 @@ fun ProductPage(navController: NavController) {
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Normal
                     )
+                    var timeLeft by remember { mutableStateOf(15664L) }
+
+                    LaunchedEffect(Unit) {
+                        while (timeLeft > 0) {
+                            delay(1000)
+                            timeLeft--
+                        }
+                    }
+
                     Text(
-                        text = "04:21:04",
+                        text = "%02d:%02d:%02d".format(timeLeft / 3600, (timeLeft % 3600) / 60, timeLeft % 60),
                         color = GoldYellow,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
