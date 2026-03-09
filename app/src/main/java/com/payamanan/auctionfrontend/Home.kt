@@ -1,5 +1,8 @@
 package com.payamanan.auctionfrontend
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -32,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 
 // ── Colours ───────────────────────────────────────────────────────────────────
 private val OliveGreen = Color(0xFF43532D) // Darker green for bidding section
@@ -40,6 +44,7 @@ private val GoldBtn    = Color(0xFFB8860B)
 private val BgGray     = Color(0xFFFBF9F4)
 private val TextDark   = Color(0xFF1A1A1A)
 private val AlertRed   = Color(0xFFB22222)
+private val SearchBlue = Color(0xFF0091FF)
 private val ModalGray  = Color(0xFFF8F8F8)
 
 // ── Fonts ─────────────────────────────────────────────────────────────────────
@@ -55,7 +60,8 @@ data class AuctionItem(
     val title       : String,
     val description : String = "",
     val price       : String,
-    val imageRes    : Int?,
+    val imageRes    : Int? = null,
+    val imageUri    : Uri? = null,
     val isOwner     : Boolean = false
 )
 
@@ -293,14 +299,14 @@ fun Home(navController: NavController) {
                 title = "Add Item to Auction",
                 confirmLabel = "Add Item",
                 onDismiss = { showAddDialog = false },
-                onConfirm = { name, desc, price ->
+                onConfirm = { name, desc, price, uri ->
                     sampleItems.add(
                         AuctionItem(
                             id = "item_${sampleItems.size}",
                             title = name,
                             description = desc,
                             price = "₱$price",
-                            imageRes = R.drawable.sample_tee_twinnem,
+                            imageUri = uri,
                             isOwner = true
                         )
                     )
@@ -316,14 +322,16 @@ fun Home(navController: NavController) {
                 initialName = selectedItemForDialog!!.title,
                 initialDesc = selectedItemForDialog!!.description,
                 initialPrice = selectedItemForDialog!!.price.replace("₱", "").replace(",", ""),
+                initialUri = selectedItemForDialog!!.imageUri,
                 onDismiss = { showEditDialog = false },
-                onConfirm = { name, desc, price ->
+                onConfirm = { name, desc, price, uri ->
                     val index = sampleItems.indexOfFirst { it.id == selectedItemForDialog!!.id }
                     if (index != -1) {
                         sampleItems[index] = selectedItemForDialog!!.copy(
                             title = name,
                             description = desc,
-                            price = "₱$price"
+                            price = "₱$price",
+                            imageUri = uri
                         )
                     }
                     showEditDialog = false
@@ -351,12 +359,20 @@ fun AuctionFormDialog(
     initialName: String = "",
     initialDesc: String = "",
     initialPrice: String = "",
+    initialUri: Uri? = null,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String) -> Unit
+    onConfirm: (String, String, String, Uri?) -> Unit
 ) {
     var name by remember { mutableStateOf(initialName) }
     var desc by remember { mutableStateOf(initialDesc) }
     var price by remember { mutableStateOf(initialPrice) }
+    var imageUri by remember { mutableStateOf(initialUri) }
+
+    val pickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) imageUri = uri
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -388,12 +404,31 @@ fun AuctionFormDialog(
 
                 Spacer(Modifier.height(20.dp))
 
-                // Placeholder image
+                // Image Upload Area
                 Box(
                     modifier = Modifier
                         .size(160.dp)
-                        .background(Color(0xFFD9D9D9), RoundedCornerShape(4.dp))
-                )
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFFD9D9D9))
+                        .clickable { pickerLauncher.launch("image/*") },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (imageUri != null) {
+                        AsyncImage(
+                            model = imageUri,
+                            contentDescription = "Selected Image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Outlined.AddAPhoto,
+                            contentDescription = "Add Photo",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
 
                 Spacer(Modifier.height(24.dp))
 
@@ -406,7 +441,7 @@ fun AuctionFormDialog(
                 Spacer(Modifier.height(32.dp))
 
                 Button(
-                    onClick = { onConfirm(name, desc, price) },
+                    onClick = { onConfirm(name, desc, price, imageUri) },
                     modifier = Modifier
                         .fillMaxWidth(0.65f)
                         .height(48.dp),
@@ -504,22 +539,42 @@ private fun HostedAuctionCard(item: AuctionItem, onEditClick: () -> Unit, onEndA
                 Text(text = item.title, fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = TextDark, maxLines = 3, overflow = TextOverflow.Ellipsis, lineHeight = 16.sp)
                 Text(text = item.price, fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF4E5B2E))
                 Spacer(Modifier.height(8.dp))
-                Button(
-                    onClick = { onEndAuctionClick() },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = AlertRed),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                    modifier = Modifier.height(32.dp)
-                ) {
-                    Text(text = "Close Bid", fontSize = 10.sp, color = Color.White)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { onEndAuctionClick() },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = AlertRed),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Text(text = "Close Bid", fontSize = 10.sp, color = Color.White)
+                    }
+                    Button(
+                        onClick = { onEditClick() },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = GoldBtn),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Text(text = "Edit", fontSize = 10.sp, color = Color.White)
+                    }
                 }
             }
-            if (item.imageRes != null) {
+            
+            val imageModifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp))
+            if (item.imageUri != null) {
+                AsyncImage(
+                    model = item.imageUri,
+                    contentDescription = item.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = imageModifier
+                )
+            } else if (item.imageRes != null) {
                 Image(
                     painter = painterResource(id = item.imageRes),
                     contentDescription = item.title,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp))
+                    modifier = imageModifier
                 )
             }
         }
@@ -536,7 +591,14 @@ private fun AuctionCard(item: AuctionItem, onBidClick: () -> Unit) {
     ) {
         Column {
             Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                if (item.imageRes != null) {
+                if (item.imageUri != null) {
+                    AsyncImage(
+                        model = item.imageUri,
+                        contentDescription = item.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else if (item.imageRes != null) {
                     Image(
                         painter            = painterResource(id = item.imageRes),
                         contentDescription = item.title,
