@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.payamanan.auctionfrontend.ui.theme.InriaSerif
 import com.payamanan.auctionfrontend.ui.theme.Inter
 import androidx.compose.runtime.*
-import androidx.compose.material3.*
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
 fun Login(navController: NavController) {
@@ -65,6 +65,7 @@ fun Login(navController: NavController) {
                         value = password,
                         onValueChange = { password = it },
                         placeholder = { Text("Enter Password...") },
+                        visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(15.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
