@@ -172,13 +172,6 @@ fun ProductPage(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Box(
-                modifier = Modifier
-                    .width(44.dp).height(4.dp)
-                    .clip(CircleShape)
-                    .background(LightGray)
-            )
-
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(

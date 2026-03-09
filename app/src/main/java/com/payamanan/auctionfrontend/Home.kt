@@ -71,7 +71,7 @@ fun Home(navController: NavController) {
     val sampleItems = remember {
         mutableStateListOf(
             AuctionItem("add", "",                          "",        "",            null),
-            AuctionItem("mug", "Adrian Butiu Limited Mug", "₱500",   "4h 21m 5s",   R.drawable.sample_tee_twinnem,      false),
+            AuctionItem("mug", "Adrian Butiu Limited Mug", "₱500",   "4h 21m 5s",   R.drawable.sample_mug,      false),
             AuctionItem("tee", "Adrian Butiu Limited Tee", "₱1,000", "11h 17m 35s", R.drawable.sample_tee_wacky,      true),
             AuctionItem("cal", "Adrian Butiu Calendar",    "₱300",   "2h 14m 5s",   R.drawable.sample_calendar, false)
         )
@@ -114,11 +114,13 @@ fun Home(navController: NavController) {
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
+                Image(
+                    painter = painterResource(id = R.drawable.ivy_pfp),
+                    contentDescription = "Profile",
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .size(52.dp)
                         .clip(CircleShape)
-                        .background(Color.LightGray)
                         .clickable { navController.navigate("account") }
                 )
 
