@@ -262,7 +262,13 @@ fun Home(navController: NavController) {
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    val rows = sampleItems.chunked(2)
+                    // Filter items based on search query (case-insensitive)
+                    val filteredItems = sampleItems.filter { item ->
+                        item.title.contains(searchQuery, ignoreCase = true) || 
+                        (item.id == "add" && searchQuery.isEmpty())
+                    }
+
+                    val rows = filteredItems.chunked(2)
                     rows.forEach { rowItems ->
                         Row(
                             modifier              = Modifier
