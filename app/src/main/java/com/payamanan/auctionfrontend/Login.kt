@@ -39,7 +39,7 @@ fun Login(navController: NavController) {
                 Column(modifier = Modifier.padding(24.dp),
 
                     verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(text = "Login", style = TextStyle(color = Color(0xFFB1822C), fontSize = 40.sp, fontFamily = InriaSerif, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center))
+                    Text(text = "Login", modifier = Modifier.align(Alignment.CenterHorizontally), style = TextStyle(color = Color(0xFFB1822C), fontSize = 40.sp, fontFamily = InriaSerif, fontWeight = FontWeight.Bold))
                     Text(text = "Username/Email", style = TextStyle(color = Color(0xFFB1822C), fontSize = 16.sp, fontFamily = Inter, fontWeight = FontWeight.Normal, textAlign = TextAlign.Left))
                     var username by remember { mutableStateOf("") }
                     OutlinedTextField(
@@ -77,7 +77,6 @@ fun Login(navController: NavController) {
                             focusedLabelColor = Color(0xFFB1822C)
                         )
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
                     Button(
                         onClick = { navController.navigate("home") },
                         modifier = Modifier.fillMaxWidth().height(50.dp),
