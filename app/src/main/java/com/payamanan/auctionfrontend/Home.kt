@@ -11,16 +11,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.outlined.Add
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,17 +29,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 
 // ── Colours ───────────────────────────────────────────────────────────────────
-private val OliveGreen = Color(0xFF4E5B2E)
-private val GoldBtn    = Color(0xFF8B7355)
-private val BgGray     = Color(0xFFF5F5F0)
+private val OliveGreen = Color(0xFF43532D) // Darker green for bidding section
+private val HostingBg  = Color(0xFFFDEFD5) // Peach/Beige for hosting
+private val GoldBtn    = Color(0xFFB8860B)
+private val BgGray     = Color(0xFFFBF9F4)
 private val TextDark   = Color(0xFF1A1A1A)
-private val HeartRed   = Color(0xFFD32F2F)
+private val AlertRed   = Color(0xFFB22222)
+private val ModalGray  = Color(0xFFF8F8F8)
 
 // ── Fonts ─────────────────────────────────────────────────────────────────────
-// Place inria_serif_regular.ttf, inter_regular.ttf, inter_bold.ttf in res/font/
 private val InriaSerif = FontFamily(Font(R.font.inriaserifregular))
 private val InterFont  = FontFamily(
     Font(R.font.inter, FontWeight.Normal),
@@ -58,10 +53,10 @@ private val InterFont  = FontFamily(
 data class AuctionItem(
     val id          : String,
     val title       : String,
+    val description : String = "",
     val price       : String,
-    val timeLeft    : String,
     val imageRes    : Int?,
-    val isFavourite : Boolean = false
+    val isOwner     : Boolean = false
 )
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -70,40 +65,54 @@ fun Home(navController: NavController) {
 
     val sampleItems = remember {
         mutableStateListOf(
-            AuctionItem("add", "",                          "",        "",            null),
-            AuctionItem("mug", "Adrian Butiu Limited Mug", "₱500",   "4h 21m 5s",   R.drawable.sample_mug,      false),
-            AuctionItem("tee", "Adrian Butiu Limited Tee", "₱1,000", "11h 17m 35s", R.drawable.sample_tee_wacky,      true),
-            AuctionItem("cal", "Adrian Butiu Calendar",    "₱300",   "2h 14m 5s",   R.drawable.sample_calendar, false)
+            AuctionItem("add", "", "",                         "",                   null),
+            AuctionItem("tee-t", "Adrian Butiu Limited Tee - Twinnem", "Cotton Tee worn by Balong", "₱500",   R.drawable.sample_tee_twinnem, isOwner = true),
+            AuctionItem("cal", "Adrian Butiu Calendar",    "2024 calendar.", "₱300",   R.drawable.sample_calendar, isOwner = false),
+            AuctionItem("mug", "Adrian Butiu Limited Mug", "Limited edition mug.", "₱500",   R.drawable.sample_mug,      isOwner = false),
+            AuctionItem("tee", "Adrian Butiu Limited Tee", "Customized t-shirt.", "₱1,000", R.drawable.sample_tee_wacky, isOwner = false),
+            AuctionItem("cal2", "Adrian Butiu Calendar",    "2024 calendar.", "₱300",   R.drawable.sample_calendar, isOwner = false)
         )
     }
 
     val scrollState = rememberScrollState()
     var searchQuery by remember { mutableStateOf("") }
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(1) } // Default to Home (middle)
+
+    // Dialog states
+    var showEditDialog by remember { mutableStateOf(false) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var showEndAuctionDialog by remember { mutableStateOf(false) }
+    var selectedItemForDialog by remember { mutableStateOf<AuctionItem?>(null) }
 
     Scaffold(
-        containerColor = BgGray,
+        containerColor = Color.White,
         bottomBar = {
-            BottomNavBar(
-                selectedTab   = selectedTab,
-                onTabSelected = { idx ->
-                    selectedTab = idx
-                    when (idx) {
-                        0 -> { /* already home */ }
-                        1 -> navController.navigate("favourites")
-                        2 -> navController.navigate("auctions")
-                        3 -> navController.navigate("account")
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp, start = 16.dp, end = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                BottomNavBar(
+                    selectedTab   = selectedTab,
+                    onTabSelected = { idx ->
+                        selectedTab = idx
+                        when (idx) {
+                            0 -> navController.navigate("auctions") // History
+                            1 -> { /* home */ }
+                            2 -> navController.navigate("account")  // User
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     ) { innerPadding ->
 
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(innerPadding)
+                .fillMaxSize()
+                .background(BgGray)
+                .padding(bottom = innerPadding.calculateBottomPadding())
                 .verticalScroll(scrollState)
         ) {
 
@@ -111,7 +120,7 @@ fun Home(navController: NavController) {
             Row(
                 modifier          = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                    .padding(horizontal = 20.dp, vertical = 24.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
@@ -119,39 +128,26 @@ fun Home(navController: NavController) {
                     contentDescription = "Profile",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(52.dp)
+                        .size(64.dp)
                         .clip(CircleShape)
                         .clickable { navController.navigate("account") }
                 )
 
-                Spacer(Modifier.width(12.dp))
+                Spacer(Modifier.width(16.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text       = "Welcome",
                         fontFamily = InterFont,
-                        fontSize   = 12.sp,
-                        color      = Color(0xFF888880)
+                        fontSize   = 14.sp,
+                        color      = GoldBtn
                     )
                     Text(
                         text       = "Ivy Timoteo",
                         fontFamily = InterFont,
                         fontWeight = FontWeight.Bold,
-                        fontSize   = 18.sp,
-                        color      = TextDark
-                    )
-                }
-
-                IconButton(
-                    onClick  = { navController.navigate("notifications") },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .border(1.dp, Color(0xFFD0CFC8), CircleShape)
-                ) {
-                    Icon(
-                        imageVector        = Icons.Outlined.Notifications,
-                        contentDescription = "Notifications",
-                        tint               = TextDark
+                        fontSize   = 22.sp,
+                        color      = Color(0xFF4B3621)
                     )
                 }
             }
@@ -194,128 +190,277 @@ fun Home(navController: NavController) {
                         modifier      = Modifier.fillMaxWidth()
                     )
                 }
-                Icon(
-                    imageVector        = Icons.Outlined.MoreVert,
-                    contentDescription = "Filter",
-                    tint               = Color.Gray,
-                    modifier           = Modifier.size(20.dp)
-                )
             }
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(24.dp))
 
             // ── Payamanan title ───────────────────────────────────────────────
             Text(
                 text       = "Payamanan",
                 fontFamily = InriaSerif,
                 fontWeight = FontWeight.Bold,
-                fontSize   = 26.sp,
-                color      = OliveGreen,
+                fontSize   = 28.sp,
+                color      = GoldBtn,
                 modifier   = Modifier.padding(horizontal = 20.dp)
             )
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
-            // ── Popular Auctions card ─────────────────────────────────────────
-            Card(
-                modifier  = Modifier
+            // ── SECTION: Hosting ─────────────────────────────────────────────
+            Column(
+                modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(horizontal = 12.dp),
-                shape     = RoundedCornerShape(20.dp),
-                colors    = CardDefaults.cardColors(containerColor = OliveGreen),
-                elevation = CardDefaults.cardElevation(0.dp)
+                    .background(HostingBg)
+                    .padding(vertical = 24.dp, horizontal = 12.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .padding(16.dp)
+                val filteredItems = sampleItems.filter { item ->
+                    item.title.contains(searchQuery, ignoreCase = true) || 
+                    (item.id == "add" && searchQuery.isEmpty())
+                }
+                val hostedItems = filteredItems.filter { it.isOwner || it.id == "add" }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-
-                    Row(
-                        modifier              = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment     = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text       = "Popular Auctions",
-                            fontFamily = InterFont,
-                            fontWeight = FontWeight.Bold,
-                            fontSize   = 18.sp,
-                            color      = Color.White
-                        )
-                        TextButton(onClick = { navController.navigate("auctions") }) {
-                            Text(
-                                text       = "View All",
-                                fontFamily = InterFont,
-                                fontSize   = 13.sp,
-                                color      = Color(0xFFD4C9A0)
-                            )
-                        }
-                    }
-
-                    Text(
-                        text     = "• • •",
-                        color    = Color(0xFFD4C9A0),
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    // Filter items based on search query (case-insensitive)
-                    val filteredItems = sampleItems.filter { item ->
-                        item.title.contains(searchQuery, ignoreCase = true) || 
-                        (item.id == "add" && searchQuery.isEmpty())
-                    }
-
-                    val rows = filteredItems.chunked(2)
-                    rows.forEach { rowItems ->
-                        Row(
-                            modifier              = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            rowItems.forEach { item ->
-                                Box(modifier = Modifier.weight(1f).wrapContentHeight()) {
-                                    if (item.id == "add") {
-                                        AddItemCard(onClick = { navController.navigate("add-item") })
-                                    } else {
-                                        AuctionCard(
-                                            item       = item,
-                                            onFavClick = {
-                                                val idx = sampleItems.indexOfFirst { it.id == item.id }
-                                                if (idx != -1) sampleItems[idx] =
-                                                    sampleItems[idx].copy(isFavourite = !sampleItems[idx].isFavourite)
-                                            },
-                                            onBidClick = { navController.navigate("product-page/${item.id}") }
-                                        )
+                    hostedItems.take(2).forEach { item ->
+                        Box(modifier = Modifier.weight(1f)) {
+                            if (item.id == "add") {
+                                AddItemCard(onClick = { showAddDialog = true })
+                            } else {
+                                HostedAuctionCard(
+                                    item = item,
+                                    onEditClick = {
+                                        selectedItemForDialog = item
+                                        showEditDialog = true
+                                    },
+                                    onEndAuctionClick = {
+                                        selectedItemForDialog = item
+                                        showEndAuctionDialog = true
                                     }
-                                }
+                                )
                             }
-                            if (rowItems.size == 1) Spacer(Modifier.weight(1f))
                         }
-                        Spacer(Modifier.height(10.dp))
                     }
+                    if (hostedItems.size == 1) Spacer(Modifier.weight(1f))
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            // ── SECTION: Bidding (Popular Auctions) ──────────────────────────
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 40.dp, topEnd = 40.dp))
+                    .background(OliveGreen)
+                    .padding(top = 24.dp, bottom = 100.dp, start = 16.dp, end = 16.dp)
+            ) {
+                Text(
+                    text       = "Popular Auctions",
+                    fontFamily = InterFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize   = 22.sp,
+                    color      = Color.White,
+                    modifier   = Modifier.padding(start = 8.dp, bottom = 16.dp)
+                )
+
+                val biddingItems = sampleItems.filter { !it.isOwner && it.id != "add" }
+                    .filter { it.title.contains(searchQuery, ignoreCase = true) }
+                
+                val rows = biddingItems.chunked(2)
+                rows.forEach { rowItems ->
+                    Row(
+                        modifier              = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        rowItems.forEach { item ->
+                            Box(modifier = Modifier.weight(1f)) {
+                                AuctionCard(
+                                    item = item,
+                                    onBidClick = { navController.navigate("product-page/${item.id}") }
+                                )
+                            }
+                        }
+                        if (rowItems.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                    Spacer(Modifier.height(16.dp))
+                }
+            }
+        }
+
+        // ── Dialogs ──────────────────────────────────────────────────────────
+        if (showAddDialog) {
+            AuctionFormDialog(
+                title = "Add Item to Auction",
+                confirmLabel = "Add Item",
+                onDismiss = { showAddDialog = false },
+                onConfirm = { name, desc, price ->
+                    sampleItems.add(
+                        AuctionItem(
+                            id = "item_${sampleItems.size}",
+                            title = name,
+                            description = desc,
+                            price = "₱$price",
+                            imageRes = R.drawable.sample_tee_twinnem,
+                            isOwner = true
+                        )
+                    )
+                    showAddDialog = false
+                }
+            )
+        }
+
+        if (showEditDialog && selectedItemForDialog != null) {
+            AuctionFormDialog(
+                title = "Edit Item to Auction",
+                confirmLabel = "Save Changes",
+                initialName = selectedItemForDialog!!.title,
+                initialDesc = selectedItemForDialog!!.description,
+                initialPrice = selectedItemForDialog!!.price.replace("₱", "").replace(",", ""),
+                onDismiss = { showEditDialog = false },
+                onConfirm = { name, desc, price ->
+                    val index = sampleItems.indexOfFirst { it.id == selectedItemForDialog!!.id }
+                    if (index != -1) {
+                        sampleItems[index] = selectedItemForDialog!!.copy(
+                            title = name,
+                            description = desc,
+                            price = "₱$price"
+                        )
+                    }
+                    showEditDialog = false
+                }
+            )
+        }
+
+        if (showEndAuctionDialog && selectedItemForDialog != null) {
+            EndAuctionDialog(
+                item = selectedItemForDialog!!,
+                onDismiss = { showEndAuctionDialog = false },
+                onConfirm = {
+                    sampleItems.removeIf { it.id == selectedItemForDialog?.id }
+                    showEndAuctionDialog = false
+                }
+            )
         }
     }
 }
 
-// ── Add-item placeholder ──────────────────────────────────────────────────────
+@Composable
+fun AuctionFormDialog(
+    title: String,
+    confirmLabel: String,
+    initialName: String = "",
+    initialDesc: String = "",
+    initialPrice: String = "",
+    onDismiss: () -> Unit,
+    onConfirm: (String, String, String) -> Unit
+) {
+    var name by remember { mutableStateOf(initialName) }
+    var desc by remember { mutableStateOf(initialDesc) }
+    var price by remember { mutableStateOf(initialPrice) }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = ModalGray)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = title, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextDark)
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Gray)
+                    }
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                // Placeholder image
+                Box(
+                    modifier = Modifier
+                        .size(160.dp)
+                        .background(Color(0xFFD9D9D9), RoundedCornerShape(4.dp))
+                )
+
+                Spacer(Modifier.height(24.dp))
+
+                DialogTextField(label = "Item Name", value = name, onValueChange = { name = it })
+                Spacer(Modifier.height(16.dp))
+                DialogTextField(label = "Item Description", value = desc, onValueChange = { desc = it })
+                Spacer(Modifier.height(16.dp))
+                DialogTextField(label = "Initial Price", value = price, onValueChange = { price = it })
+
+                Spacer(Modifier.height(32.dp))
+
+                Button(
+                    onClick = { onConfirm(name, desc, price) },
+                    modifier = Modifier
+                        .fillMaxWidth(0.65f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = GoldBtn)
+                ) {
+                    Text(text = confirmLabel, color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DialogTextField(label: String, value: String, onValueChange: (String) -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(text = label, fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp))
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White, RoundedCornerShape(12.dp))
+                .border(1.dp, Color(0xFFEEEEEE), RoundedCornerShape(12.dp))
+                .padding(14.dp),
+            textStyle = TextStyle(fontSize = 14.sp, color = TextDark)
+        )
+    }
+}
+
+@Composable
+fun EndAuctionDialog(item: AuctionItem, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("End Auction?", fontWeight = FontWeight.Bold) },
+        text = { Text("Are you sure you want to end the auction? You will receive ${item.price}. This action cannot be undone.") },
+        confirmButton = {
+            Button(onClick = onConfirm, colors = ButtonDefaults.buttonColors(containerColor = AlertRed) ) {
+                Text("End Auction")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel", color = Color.Gray) }
+        }
+    )
+}
+
 @Composable
 private fun AddItemCard(onClick: () -> Unit) {
     Card(
-        modifier  = Modifier
-            .fillMaxWidth()
-            .height(190.dp)
-            .clickable { onClick() },
-        shape     = RoundedCornerShape(14.dp),
-        colors    = CardDefaults.cardColors(containerColor = Color(0xFFF0EFE9)),
-        elevation = CardDefaults.cardElevation(0.dp)
+        modifier  = Modifier.fillMaxWidth().height(170.dp),
+        shape     = RoundedCornerShape(24.dp),
+        colors    = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column(
             modifier            = Modifier.fillMaxSize(),
@@ -324,122 +469,95 @@ private fun AddItemCard(onClick: () -> Unit) {
         ) {
             Box(
                 modifier         = Modifier
-                    .size(40.dp)
-                    .border(2.dp, Color(0xFFAAAAAA), CircleShape),
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, GoldBtn, CircleShape)
+                    .clickable { onClick() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector        = Icons.Outlined.Add,
-                    contentDescription = "Add",
-                    tint               = Color(0xFFAAAAAA),
-                    modifier           = Modifier.size(24.dp)
-                )
+                Icon(imageVector = Icons.Outlined.Add, contentDescription = "Add", tint = GoldBtn)
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
             Text(
-                text       = "Add Item to Auction",
+                text = "Add Item\nto\nAuction",
                 fontFamily = InterFont,
-                fontSize   = 12.sp,
-                color      = Color(0xFF888880),
-                textAlign  = TextAlign.Center,
-                modifier   = Modifier.padding(horizontal = 8.dp)
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextDark,
+                textAlign = TextAlign.Center,
+                lineHeight = 16.sp
             )
         }
     }
 }
 
-// ── Auction item card ──────────────────────────────────────────────────────────
 @Composable
-private fun AuctionCard(
-    item       : AuctionItem,
-    onFavClick : () -> Unit,
-    onBidClick : () -> Unit
-) {
+private fun HostedAuctionCard(item: AuctionItem, onEditClick: () -> Unit, onEndAuctionClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().height(170.dp).clickable { onEditClick() },
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxSize().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1.1f)) {
+                Text(text = item.title, fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = TextDark, maxLines = 3, overflow = TextOverflow.Ellipsis, lineHeight = 16.sp)
+                Text(text = item.price, fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color(0xFF4E5B2E))
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = { onEndAuctionClick() },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = AlertRed),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier.height(32.dp)
+                ) {
+                    Text(text = "Close Bid", fontSize = 10.sp, color = Color.White)
+                }
+            }
+            if (item.imageRes != null) {
+                Image(
+                    painter = painterResource(id = item.imageRes),
+                    contentDescription = item.title,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp))
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AuctionCard(item: AuctionItem, onBidClick: () -> Unit) {
     Card(
         modifier  = Modifier.fillMaxWidth(),
-        shape     = RoundedCornerShape(14.dp),
+        shape     = RoundedCornerShape(20.dp),
         colors    = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(0.dp)
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column {
-            Box(
-                modifier          = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp)
-                    .background(Color(0xFFF0EFE9)),
-                contentAlignment  = Alignment.Center
-            ) {
+            Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
                 if (item.imageRes != null) {
                     Image(
                         painter            = painterResource(id = item.imageRes),
                         contentDescription = item.title,
                         contentScale       = ContentScale.Fit,
-                        modifier           = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 130.dp)
-                            .padding(8.dp)
-                    )
-                }
-
-                IconButton(
-                    onClick  = onFavClick,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(4.dp)
-                        .size(28.dp)
-                ) {
-                    Icon(
-                        imageVector        = if (item.isFavourite) Icons.Filled.Favorite
-                        else Icons.Filled.FavoriteBorder,
-                        contentDescription = "Favourite",
-                        tint               = if (item.isFavourite) HeartRed else Color.White,
-                        modifier           = Modifier.size(18.dp)
+                        modifier           = Modifier.fillMaxSize().padding(16.dp)
                     )
                 }
             }
-
-            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)) {
-                Text(
-                    text       = item.title,
-                    fontFamily = InterFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize   = 11.sp,
-                    color      = TextDark,
-                    maxLines   = 2,
-                    overflow   = TextOverflow.Ellipsis
-                )
-                Text(
-                    text       = item.timeLeft,
-                    fontFamily = InterFont,
-                    fontSize   = 10.sp,
-                    color      = Color(0xFF888880)
-                )
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(text = item.title, fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextDark, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))
-                Row(
-                    modifier              = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment     = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text       = item.price,
-                        fontFamily = InterFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize   = 13.sp,
-                        color      = TextDark
-                    )
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = item.price, fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextDark)
                     Button(
-                        onClick        = onBidClick,
-                        shape          = RoundedCornerShape(8.dp),
-                        colors         = ButtonDefaults.buttonColors(containerColor = GoldBtn),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                        modifier       = Modifier.height(28.dp)
+                        onClick = onBidClick,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = GoldBtn),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                        modifier = Modifier.height(30.dp)
                     ) {
-                        Text(
-                            text       = "Place a Bid",
-                            fontFamily = InterFont,
-                            fontSize   = 10.sp,
-                            color      = Color.White
-                        )
+                        Text(text = "Place a Bid", fontSize = 11.sp, color = Color.White)
                     }
                 }
             }
@@ -447,39 +565,34 @@ private fun AuctionCard(
     }
 }
 
-// ── Bottom navigation bar ─────────────────────────────────────────────────────
 @Composable
-private fun BottomNavBar(
-    selectedTab   : Int,
-    onTabSelected : (Int) -> Unit
-) {
-    NavigationBar(
-        containerColor = Color.White,
-        tonalElevation = 4.dp
+private fun BottomNavBar(selectedTab: Int, onTabSelected: (Int) -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().height(64.dp),
+        shape = RoundedCornerShape(32.dp),
+        color = Color.White,
+        shadowElevation = 8.dp
     ) {
-        val items = listOf(
-            Icons.Outlined.Home           to "Home",
-            Icons.Outlined.FavoriteBorder to "Favourites",
-            Icons.Outlined.ShoppingCart   to "Auctions",
-            Icons.Outlined.Settings       to "Settings"
-        )
-        items.forEachIndexed { index, (icon, label) ->
-            NavigationBarItem(
-                selected = selectedTab == index,
-                onClick  = { onTabSelected(index) },
-                icon     = {
-                    Icon(
-                        imageVector        = icon,
-                        contentDescription = label,
-                        modifier           = Modifier.size(24.dp)
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor   = OliveGreen,
-                    unselectedIconColor = Color(0xFF888880),
-                    indicatorColor      = Color.Transparent
-                )
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val items = listOf(
+                Icons.Outlined.History to 0, // Transaction History
+                Icons.Outlined.Home to 1,
+                Icons.Outlined.Person to 2 // User
             )
+            items.forEach { (icon, index) ->
+                IconButton(onClick = { onTabSelected(index) }) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = if (selectedTab == index) GoldBtn else Color(0xFF4B3621),
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
+            }
         }
     }
 }
