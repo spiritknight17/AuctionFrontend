@@ -45,7 +45,7 @@ fun Login(navController: NavController) {
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
-                        placeholder = { Text("Enter Username/Email...") },
+                        placeholder = { Text("Enter Username/Email...", color = Color(0xFFB1822C).copy(alpha = 0.5f)) },
                         shape = RoundedCornerShape(15.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -53,8 +53,8 @@ fun Login(navController: NavController) {
                             unfocusedBorderColor = Color(0xFF495C26),
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White,
-                            focusedTextColor = Color(0xFFB1822C80),
-                            unfocusedTextColor = Color(0xFFB1822C80),
+                            focusedTextColor = Color(0xFFB1822C),
+                            unfocusedTextColor = Color(0xFFB1822C),
                             focusedLabelColor = Color(0xFFB1822C)
                         )
                     )
@@ -64,7 +64,7 @@ fun Login(navController: NavController) {
 
                         value = password,
                         onValueChange = { password = it },
-                        placeholder = { Text("Enter Password...") },
+                        placeholder = { Text("Enter Password...", color = Color(0xFFB1822C).copy(alpha = 0.5f)) },
                         visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(15.dp),
                         modifier = Modifier.fillMaxWidth(),
@@ -73,8 +73,8 @@ fun Login(navController: NavController) {
                             unfocusedBorderColor = Color(0xFF495C26),
                             focusedContainerColor = Color.White,
                             unfocusedContainerColor = Color.White,
-                            focusedTextColor = Color(0xFFB1822C80),
-                            unfocusedTextColor = Color(0xFFB1822C80),
+                            focusedTextColor = Color(0xFFB1822C),
+                            unfocusedTextColor = Color(0xFFB1822C),
                             focusedLabelColor = Color(0xFFB1822C)
                         )
                     )

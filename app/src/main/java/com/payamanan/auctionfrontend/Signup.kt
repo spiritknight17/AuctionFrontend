@@ -72,7 +72,7 @@ fun Signup(navController: NavController) {
                         OutlinedTextField(
                             value = username,
                             onValueChange = { username = it },
-                            placeholder = { Text("Enter Username....")  },
+                            placeholder = { Text("Enter Username....", color = Color(0xFFB1822C).copy(alpha = 0.5f))  },
                             shape = RoundedCornerShape(15.dp),
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -91,7 +91,7 @@ fun Signup(navController: NavController) {
                         OutlinedTextField(
                             value = email,
                             onValueChange = { email = it },
-                            placeholder = { Text("Enter Email....") },
+                            placeholder = { Text("Enter Email....", color = Color(0xFFB1822C).copy(alpha = 0.5f)) },
                             shape = RoundedCornerShape(15.dp),
                             modifier = Modifier.fillMaxWidth(),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -110,7 +110,7 @@ fun Signup(navController: NavController) {
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
-                            placeholder = { Text("Enter Password....") },
+                            placeholder = { Text("Enter Password....", color = Color(0xFFB1822C).copy(alpha = 0.5f)) },
                             visualTransformation = PasswordVisualTransformation(),
                             shape = RoundedCornerShape(15.dp),
                             modifier = Modifier.fillMaxWidth(),
