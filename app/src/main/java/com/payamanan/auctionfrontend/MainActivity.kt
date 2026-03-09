@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
             AuctionFrontendTheme {
                 Scaffold(modifier = Modifi er.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "Matt",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
