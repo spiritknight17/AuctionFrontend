@@ -4,14 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.payamanan.auctionfrontend.ui.theme.AuctionFrontendTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -25,6 +18,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -43,6 +37,21 @@ fun AppNavigation() {
         }
         composable("product-page") {
             ProductPage(navController = navController)
+        }
+        composable("product-page/{id}") {
+            ProductPage(navController = navController)
+        }
+        composable("favourites") {
+            Favourites(navController = navController)
+        }
+        composable("auctions") {
+            Auctions(navController = navController)
+        }
+        composable("notifications") {
+            Notifications(navController = navController)
+        }
+        composable("add-item") {
+            AddItem(navController = navController)
         }
     }
 }
