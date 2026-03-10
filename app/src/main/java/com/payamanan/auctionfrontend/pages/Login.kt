@@ -1,8 +1,6 @@
-package com.payamanan.auctionfrontend
-import android.R.attr.label
+package com.payamanan.auctionfrontend.pages
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -21,6 +19,7 @@ import com.payamanan.auctionfrontend.ui.theme.InriaSerif
 import com.payamanan.auctionfrontend.ui.theme.Inter
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import com.payamanan.auctionfrontend.R
 
 @Composable
 fun Login(navController: NavController) {

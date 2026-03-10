@@ -1,4 +1,4 @@
-package com.payamanan.auctionfrontend
+package com.payamanan.auctionfrontend.sharedComponents
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.payamanan.auctionfrontend.pages.InterFont
 import com.payamanan.auctionfrontend.ui.theme.GoldBtn
 import com.payamanan.auctionfrontend.ui.theme.TextDark
 

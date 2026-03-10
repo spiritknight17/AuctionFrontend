@@ -1,48 +1,35 @@
-package com.payamanan.auctionfrontend
+package com.payamanan.auctionfrontend.pages
 
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import com.payamanan.auctionfrontend.sharedComponents.HostedAuctionCard
+import com.payamanan.auctionfrontend.R
+import com.payamanan.auctionfrontend.dialogs.AuctionFormDialog
+import com.payamanan.auctionfrontend.dialogs.EndAuctionDialog
+import com.payamanan.auctionfrontend.sharedComponents.AddItemCard
+import com.payamanan.auctionfrontend.sharedComponents.AuctionCard
+import com.payamanan.auctionfrontend.sharedComponents.BottomNavBar
 import com.payamanan.auctionfrontend.ui.theme.BgGray
 import com.payamanan.auctionfrontend.ui.theme.GoldBtn
 import com.payamanan.auctionfrontend.ui.theme.HostingBg
-import com.payamanan.auctionfrontend.ui.theme.ModalGray
 import com.payamanan.auctionfrontend.ui.theme.OliveGreen
-import com.payamanan.auctionfrontend.ui.theme.TextDark
-import com.payamanan.auctionfrontend.ui.theme.AlertRed
+
 val InriaSerif = FontFamily(Font(R.font.inriaserifregular))
 val InterFont  = FontFamily(
     Font(R.font.inter, FontWeight.Normal),
@@ -94,12 +81,14 @@ fun Home(navController: NavController) {
                 contentAlignment = Alignment.Center
             ) {
                 BottomNavBar(
-                    selectedTab   = selectedTab,
+                    selectedTab = selectedTab,
                     onTabSelected = { idx ->
                         selectedTab = idx
                         when (idx) {
                             0 -> navController.navigate("auctions") // History
-                            1 -> { /* home */ }
+                            1 -> { /* home */
+                            }
+
                             2 -> navController.navigate("account")  // User
                         }
                     }

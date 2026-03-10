@@ -1,12 +1,10 @@
-package com.payamanan.auctionfrontend
+package com.payamanan.auctionfrontend.pages
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -15,15 +13,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -31,7 +26,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
 
 private val OliveGreen = Color(0xFF4A5C2F)
 private val GoldYellow = Color(0xFFC8962A)
@@ -105,52 +99,6 @@ fun Account(navController: NavController) {
         }
 
         Spacer(modifier = Modifier.height(28.dp))
-
-        // ── Profile picture with camera icon overlay ──────────────────────────
-        Box(
-            modifier = Modifier
-                .size(110.dp)
-                .clickable { photoPickerLauncher.launch("image/*") },
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            // Show picked photo if available, otherwise show default drawable
-            if (profileImageUri != null) {
-                AsyncImage(
-                    model = profileImageUri,
-                    contentDescription = "Profile Picture",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(110.dp)
-                        .clip(CircleShape)
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = R.drawable.ivy_pfp),
-                    contentDescription = "Profile Picture",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(110.dp)
-                        .clip(CircleShape)
-                )
-            }
-
-            // Camera icon badge at bottom-right
-            Box(
-                modifier = Modifier
-                    .size(30.dp)
-                    .clip(CircleShape)
-                    .background(OliveGreen)
-                    .border(2.dp, OffWhite, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = "Change Photo",
-                    tint = Color.White,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-        }
 
         Spacer(modifier = Modifier.height(32.dp))
 

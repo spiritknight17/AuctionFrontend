@@ -1,4 +1,4 @@
-package com.payamanan.auctionfrontend
+package com.payamanan.auctionfrontend.sharedComponents
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

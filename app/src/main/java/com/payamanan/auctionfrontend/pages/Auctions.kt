@@ -1,6 +1,5 @@
-package com.payamanan.auctionfrontend
+package com.payamanan.auctionfrontend.pages
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,14 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,14 +23,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.payamanan.auctionfrontend.R
+import com.payamanan.auctionfrontend.sharedComponents.TransactionHistoryCard
 
 val Interfont = FontFamily(Font(R.font.inter, FontWeight.Normal), Font(R.font.inter18ptbold, FontWeight.Bold))
 
@@ -49,10 +43,38 @@ fun Auctions(navController: NavController) {
     val goldText = Color(0xFFB1822C)
     val sampleItems = remember {
         mutableStateListOf(
-            AuctionItem("tee-t", "Adrian Butiu Limited Tee - Twinnem", "Cotton Tee", "₱500", R.drawable.sample_tee_twinnem, isOwner = false),
-            AuctionItem("mug", "Adrian Butiu Limited Mug", "Limited edition.", "₱500", R.drawable.sample_mug, isOwner = false),
-            AuctionItem("tee", "Adrian Butiu Limited Tee", "Customized t-shirt.", "₱1,000", R.drawable.sample_tee_wacky, isOwner = false),
-            AuctionItem("cal", "Adrian Butiu Calendar", "2024 calendar.", "₱300", R.drawable.sample_calendar, isOwner = false)
+            AuctionItem(
+                "tee-t",
+                "Adrian Butiu Limited Tee - Twinnem",
+                "Cotton Tee",
+                "₱500",
+                R.drawable.sample_tee_twinnem,
+                isOwner = false
+            ),
+            AuctionItem(
+                "mug",
+                "Adrian Butiu Limited Mug",
+                "Limited edition.",
+                "₱500",
+                R.drawable.sample_mug,
+                isOwner = false
+            ),
+            AuctionItem(
+                "tee",
+                "Adrian Butiu Limited Tee",
+                "Customized t-shirt.",
+                "₱1,000",
+                R.drawable.sample_tee_wacky,
+                isOwner = false
+            ),
+            AuctionItem(
+                "cal",
+                "Adrian Butiu Calendar",
+                "2024 calendar.",
+                "₱300",
+                R.drawable.sample_calendar,
+                isOwner = false
+            )
         )
     }
 

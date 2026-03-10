@@ -1,4 +1,4 @@
-package com.payamanan.auctionfrontend
+package com.payamanan.auctionfrontend.dialogs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
