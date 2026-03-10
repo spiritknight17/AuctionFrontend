@@ -21,14 +21,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.text.style.TextAlign
+import com.payamanan.auctionfrontend.ui.theme.DarkText
+import com.payamanan.auctionfrontend.ui.theme.GoldYellow
+import com.payamanan.auctionfrontend.ui.theme.LightGray
+import com.payamanan.auctionfrontend.ui.theme.OffWhite
+import com.payamanan.auctionfrontend.ui.theme.OliveGreen
+import com.payamanan.auctionfrontend.ui.theme.SubtleGray
 import kotlinx.coroutines.delay
 
-private val OliveGreen = Color(0xFF4A5C2F)
-private val GoldYellow = Color(0xFFC8962A)
-private val OffWhite   = Color(0xFFF5F5F0)
-private val LightGray  = Color(0xFFDDDDDD)
-private val DarkText   = Color(0xFF1A1A1A)
-private val SubtleGray = Color(0xFF999999)
 
 @Composable
 fun ProductPage(navController: NavController) {
@@ -43,7 +43,6 @@ fun ProductPage(navController: NavController) {
             .background(OliveGreen)
     ) {
 
-        // GREEN SECTION
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -51,8 +50,6 @@ fun ProductPage(navController: NavController) {
                 .padding(horizontal = 50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // Timer row
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
@@ -105,16 +102,6 @@ fun ProductPage(navController: NavController) {
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Product image — fixed size, change drawable name as needed
-            Image(
-                painter = painterResource(id = R.drawable.sample_tee_wacky),
-                contentDescription = "Product Image",
-                contentScale = ContentScale.Fit,
-                modifier = Modifier
-                    .size(width = 300.dp, height = 250.dp)
-                    .clip(RoundedCornerShape(12.dp))
-            )
 
             Spacer(modifier = Modifier.height(14.dp))
 
@@ -169,7 +156,6 @@ fun ProductPage(navController: NavController) {
             }
         }
 
-        // WHITE BOTTOM SHEET
         Column(
             modifier = Modifier
                 .fillMaxWidth()

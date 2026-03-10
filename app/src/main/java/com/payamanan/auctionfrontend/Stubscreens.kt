@@ -47,8 +47,7 @@ import kotlin.collections.chunked
 import kotlin.collections.forEach
 
 private val Interfont = FontFamily(Font(R.font.inter, FontWeight.Normal), Font(R.font.inter18ptbold, FontWeight.Bold))
-private val InriaSerif = FontFamily(Font(R.font.inriaserifregular))
-private val GoldYellow = Color(0xFFC8962A)
+
 @Composable
 fun Favourites(navController: NavController) {
     Column(
