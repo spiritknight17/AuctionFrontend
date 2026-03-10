@@ -42,17 +42,8 @@ fun AppNavigation() {
         composable("product-page/{id}") {
             ProductPage(navController = navController)
         }
-        composable("favourites") {
-            Favourites(navController = navController)
-        }
         composable("auctions") {
             Auctions(navController = navController)
-        }
-        composable("notifications") {
-            Notifications(navController = navController)
-        }
-        composable("add-item") {
-            AddItem(navController = navController)
         }
     }
 }
