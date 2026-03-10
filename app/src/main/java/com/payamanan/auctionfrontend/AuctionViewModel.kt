@@ -19,6 +19,10 @@ class AuctionViewModel: ViewModel() {
 
     private val auctionApi: AuctionApi = RetrofitClient.auct_instance.create(AuctionApi::class.java)
 
+    init {
+        getAuctions();
+    }
+
     fun createAuction(auction: Auction) {
         viewModelScope.launch {
             try {
