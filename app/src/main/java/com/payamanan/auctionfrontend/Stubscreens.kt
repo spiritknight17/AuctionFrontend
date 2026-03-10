@@ -11,13 +11,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,10 +48,7 @@ import kotlin.collections.forEach
 
 private val Interfont = FontFamily(Font(R.font.inter, FontWeight.Normal), Font(R.font.inter18ptbold, FontWeight.Bold))
 private val InriaSerif = FontFamily(Font(R.font.inriaserifregular))
-private val GoldBtn    = Color(0xFFB8860B)
-private val TextDark: Color = Color(0xFF1A1A1A)
-private val BgGray: Color = Color(0xFFFBF9F4)
-private val HostingBg  = Color(0xFFFDEFD5)
+private val GoldYellow = Color(0xFFC8962A)
 @Composable
 fun Favourites(navController: NavController) {
     Column(
@@ -79,6 +79,13 @@ fun Auctions(navController: NavController) {
             AuctionItem("cal", "Adrian Butiu Calendar", "2024 calendar.", "₱300", R.drawable.sample_calendar, isOwner = false)
         )
     }
+    val filteredItems = remember(searchQuery, sampleItems) {
+        sampleItems.filter { item ->
+            val matchesSearch = item.title.contains(searchQuery, ignoreCase = true) ||
+                    item.description.contains(searchQuery, ignoreCase = true)
+            matchesSearch && !item.isOwner && item.id != "add"
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -107,23 +114,10 @@ fun Auctions(navController: NavController) {
                         .clickable { navController.navigate("account") }
                 )
                 Spacer(Modifier.width(16.dp))
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = "Welcome", fontFamily = Interfont, fontSize = 14.sp, color = goldText)
                     Text(text = "Ivy Timoteo", fontFamily = Interfont, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = Color(0xFF4B3621))
-                }
-                // Notification Bell
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .border(1.dp, goldText, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = android.R.drawable.ic_popup_reminder),
-                        contentDescription = "Notifications",
-                        tint = goldText,
-                        modifier = Modifier.size(20.dp)
-                    )
                 }
             }
             Row(
@@ -149,7 +143,6 @@ fun Auctions(navController: NavController) {
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                Icon(painter = painterResource(id = android.R.drawable.ic_menu_sort_by_size), contentDescription = "Filter", tint = Color.Gray, modifier = Modifier.size(20.dp))
             }
 
             Spacer(Modifier.height(24.dp))
@@ -169,26 +162,44 @@ fun Auctions(navController: NavController) {
         ) {
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = Color.White,
+                color = Color.Transparent,
                 modifier = Modifier.clickable { navController.navigate("home") }
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "<", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Spacer(Modifier.width(8.dp))
-                    Text(text = "Return to Home", fontFamily = Interfont, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .border(1.5.dp, Color.White, CircleShape)
+                            .clickable { navController.popBackStack() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color(0xFFB1822C),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 
             Spacer(Modifier.height(16.dp))
-
-            val biddingItems = sampleItems.filter { !it.isOwner && it.id != "add" }
-
-            biddingItems.forEach { item ->
-                TransactionHistoryCard(item = item)
-                Spacer(Modifier.height(12.dp))
+            if (filteredItems.isEmpty()) {
+                Text(
+                    text = "No transactions found.",
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 20.dp).align(Alignment.CenterHorizontally)
+                )
+            } else {
+                filteredItems.forEach { item ->
+                    TransactionHistoryCard(item = item)
+                    Spacer(Modifier.height(12.dp))
+                }
             }
         }
     }
@@ -225,7 +236,7 @@ fun TransactionHistoryCard(item: AuctionItem) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFBA3B3C) // Dark Red
+                    color = Color(0xFF495C26)
                 ) {
                     Text(
                         text = "Bought for ${item.price}",
