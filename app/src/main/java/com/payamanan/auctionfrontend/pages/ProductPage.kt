@@ -18,21 +18,36 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.compose.ui.text.style.TextAlign
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.payamanan.auctionfrontend.data.UserSesssion
+import com.payamanan.auctionfrontend.data.model.BidRequest
 import com.payamanan.auctionfrontend.ui.theme.DarkText
 import com.payamanan.auctionfrontend.ui.theme.GoldYellow
 import com.payamanan.auctionfrontend.ui.theme.LightGray
 import com.payamanan.auctionfrontend.ui.theme.OffWhite
 import com.payamanan.auctionfrontend.ui.theme.OliveGreen
 import com.payamanan.auctionfrontend.ui.theme.SubtleGray
+import com.payamanan.auctionfrontend.viewModels.AuctionViewModel
 import kotlinx.coroutines.delay
 
 
 @Composable
-fun ProductPage(navController: NavController) {
+fun ProductPage(navController: NavController, auctionId: String? = null) {
+    val auctionViewModel: AuctionViewModel = viewModel()
+    val auctions by auctionViewModel.auctions.collectAsState()
+    val auction = auctions.find { it.id.toString() == auctionId }
+    val user = UserSesssion.user
 
-    var bidAmount  by remember { mutableStateOf(1_000) }
-    val stepAmount = 500
-    val minBid     = 1_000
+    if (auction == null) {
+        // Handle case where auction is not found or loading
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = GoldYellow)
+        }
+        return
+    }
+
+    var bidAmount by remember { mutableFloatStateOf(auction.currentBid?.offeredPrice ?: auction.startingPrice) }
+    val stepAmount = 100f
 
     Box(
         modifier = Modifier
@@ -58,21 +73,32 @@ fun ProductPage(navController: NavController) {
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Normal
                     )
-                    var timeLeft by remember { mutableStateOf(15664L) }
+                    
+                    val endTime = auction.endTime.time
+                    var timeLeft by remember { mutableLongStateOf((endTime - System.currentTimeMillis()) / 1000) }
 
                     LaunchedEffect(Unit) {
                         while (timeLeft > 0) {
                             delay(1000)
-                            timeLeft--
+                            timeLeft = (endTime - System.currentTimeMillis()) / 1000
                         }
                     }
 
-                    Text(
-                        text = "%02d:%02d:%02d".format(timeLeft / 3600, (timeLeft % 3600) / 60, timeLeft % 60),
-                        color = GoldYellow,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (timeLeft > 0) {
+                        Text(
+                            text = "%02d:%02d:%02d".format(timeLeft / 3600, (timeLeft % 3600) / 60, timeLeft % 60),
+                            color = GoldYellow,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Text(
+                            text = "Auction Ended",
+                            color = GoldYellow,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 Box(modifier = Modifier.align(Alignment.CenterStart)) {
@@ -103,16 +129,17 @@ fun ProductPage(navController: NavController) {
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = "Adrian Butiu Limited Tee",
+                text = auction.item.name,
                 color = Color.White,
                 fontSize = 25.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Medium Sized Customized T-Shirt Made from Cotton",
+                text = auction.item.description,
                 color = OffWhite.copy(alpha = 0.65f),
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center
@@ -138,13 +165,15 @@ fun ProductPage(navController: NavController) {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "₱7,000.00",
+                        text = "₱${"%,.2f".format(auction.currentBid?.offeredPrice ?: auction.startingPrice)}",
                         color = GoldYellow,
                         fontSize = 30.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
+                    // Note: BidRequest currently only has userId, fetching username would require additional logic/API call.
+                    // For now, displaying "User ID: {id}" or similar if username not available in BidRequest
                     Text(
-                        text = "Jamie del Rosario",
+                        text = "User ID: ${auction.currentBid?.userId ?: "None"}", 
                         color = Color.White,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold
@@ -177,7 +206,7 @@ fun ProductPage(navController: NavController) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Initial Price: ₱1,000.00",
+                text = "Initial Price: ₱${"%,.2f".format(auction.startingPrice)}",
                 color = SubtleGray,
                 fontSize = 14.sp
             )
@@ -199,35 +228,23 @@ fun ProductPage(navController: NavController) {
                     contentAlignment = Alignment.Center
                 ) {
                     IconButton(
-                        onClick = {
-                            if (bidAmount - stepAmount >= minBid) bidAmount -= stepAmount
-                        },
+                        onClick = { if (bidAmount > (auction.currentBid?.offeredPrice ?: auction.startingPrice)) bidAmount -= stepAmount },
                         modifier = Modifier.size(46.dp)
                     ) {
-                        Text("−", fontSize = 26.sp, color = DarkText, fontWeight = FontWeight.Light)
+                        Text("-", fontSize = 26.sp, color = DarkText, fontWeight = FontWeight.Light)
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(24.dp))
 
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(50.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White)
-                        .border(1.5.dp, GoldYellow, RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "₱${"%,d".format(bidAmount)}.00",
-                        color = GoldYellow,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Text(
+                    text = "₱${"%,.2f".format(bidAmount)}",
+                    color = DarkText,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(24.dp))
 
                 Box(
                     modifier = Modifier
@@ -249,7 +266,15 @@ fun ProductPage(navController: NavController) {
 
             // Submit button
             Button(
-                onClick = { /* TODO: wire to ViewModel */ },
+                onClick = {
+                    user?.userId?.let { uid ->
+                         val bidRequest = BidRequest(id = null, userId = uid, offeredPrice = bidAmount)
+                         auction.id?.let { aid ->
+                             auctionViewModel.bid(aid, bidRequest)
+                             navController.popBackStack()
+                         }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -257,7 +282,7 @@ fun ProductPage(navController: NavController) {
                 colors = ButtonDefaults.buttonColors(containerColor = GoldYellow)
             ) {
                 Text(
-                    text = "₱${"%,d".format(bidAmount)}.00",
+                    text = "₱${"%,.2f".format(bidAmount)}",
                     color = Color.White,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold

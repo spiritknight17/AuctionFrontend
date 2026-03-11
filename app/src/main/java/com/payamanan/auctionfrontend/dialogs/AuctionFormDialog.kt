@@ -1,8 +1,5 @@
 package com.payamanan.auctionfrontend.dialogs
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,31 +32,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.payamanan.auctionfrontend.data.model.Auction
 import com.payamanan.auctionfrontend.ui.theme.GoldBtn
 import com.payamanan.auctionfrontend.ui.theme.ModalGray
 import com.payamanan.auctionfrontend.ui.theme.TextDark
 
 @Composable
 fun AuctionFormDialog(
-    title: String,
-    confirmLabel: String,
-    initialName: String = "",
-    initialDesc: String = "",
-    initialPrice: String = "",
-    initialUri: Uri? = null,
+    auction: Auction,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String, Uri?) -> Unit
+    onConfirm: (Auction) -> Unit
 ) {
-    var name by remember { mutableStateOf(initialName) }
-    var desc by remember { mutableStateOf(initialDesc) }
-    var price by remember { mutableStateOf(initialPrice) }
-    var imageUri by remember { mutableStateOf(initialUri) }
-
-    val pickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri != null) imageUri = uri
-    }
+    var desc by remember { mutableStateOf(auction.item.description) }
+    var price by remember { mutableStateOf(auction.startingPrice.toString()) }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -83,7 +68,7 @@ fun AuctionFormDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = title, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextDark)
+                    Text(text = auction.item.name, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextDark)
                     IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp)) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Gray)
                     }
@@ -91,8 +76,6 @@ fun AuctionFormDialog(
 
                 Spacer(Modifier.height(24.dp))
 
-                DialogTextField(label = "Item Name", value = name, onValueChange = { name = it })
-                Spacer(Modifier.height(16.dp))
                 DialogTextField(
                     label = "Item Description",
                     value = desc,
@@ -106,14 +89,19 @@ fun AuctionFormDialog(
                 Spacer(Modifier.height(32.dp))
 
                 Button(
-                    onClick = { onConfirm(name, desc, price, imageUri) },
+                    onClick = {
+                        val newPrice = price.toFloatOrNull() ?: auction.startingPrice
+                        val updatedItem = auction.item.copy(description = desc)
+                        val updatedAuction = auction.copy(item = updatedItem, startingPrice = newPrice)
+                        onConfirm(updatedAuction)
+                    },
                     modifier = Modifier
                         .fillMaxWidth(0.65f)
                         .height(48.dp),
                     shape = RoundedCornerShape(24.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = GoldBtn)
                 ) {
-                    Text(text = confirmLabel, color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(text = "Save", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         }

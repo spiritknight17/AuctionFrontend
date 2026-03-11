@@ -21,11 +21,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.payamanan.auctionfrontend.pages.AuctionItem
+import com.payamanan.auctionfrontend.data.model.Transaction
 import com.payamanan.auctionfrontend.pages.Interfont
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
-fun TransactionHistoryCard(item: AuctionItem) {
+fun TransactionHistoryCard(transaction: Transaction) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -40,15 +42,19 @@ fun TransactionHistoryCard(item: AuctionItem) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = item.title,
+                    text = transaction.auction.item.name,
                     fontFamily = Interfont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     color = Color.Black
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+                val endDate = dateFormat.format(transaction.auction.endTime)
+                
                 Text(
-                    text = "Ended 4h 21m 5s ago",
+                    text = "Ended at $endDate",
                     fontFamily = Interfont,
                     fontSize = 11.sp,
                     color = Color.Gray
@@ -59,7 +65,7 @@ fun TransactionHistoryCard(item: AuctionItem) {
                     color = Color(0xFF495C26)
                 ) {
                     Text(
-                        text = "Bought for ${item.price}",
+                        text = "Bought for ₱${transaction.finalAmount}",
                         color = Color.White,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,

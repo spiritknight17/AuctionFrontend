@@ -14,11 +14,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,54 +27,27 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.payamanan.auctionfrontend.R
+import com.payamanan.auctionfrontend.data.UserSesssion
 import com.payamanan.auctionfrontend.sharedComponents.TransactionHistoryCard
+import com.payamanan.auctionfrontend.ui.theme.bottomBgColor
+import com.payamanan.auctionfrontend.ui.theme.goldText
+import com.payamanan.auctionfrontend.ui.theme.topBgColor
+import com.payamanan.auctionfrontend.viewModels.TransactionViewModel
 
 val Interfont = FontFamily(Font(R.font.inter, FontWeight.Normal), Font(R.font.inter18ptbold, FontWeight.Bold))
 
 @Composable
 fun Auctions(navController: NavController) {
-    var searchQuery by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
-    val topBgColor = Color(0xFFFAF9F6)
-    val bottomBgColor = Color(0xFFEAD8BA)
-    val goldText = Color(0xFFB1822C)
-    val sampleItems = remember {
-        mutableStateListOf(
-            AuctionItem(
-                "tee-t",
-                "Adrian Butiu Limited Tee - Twinnem",
-                "Cotton Tee",
-                "₱500",
-                R.drawable.sample_tee_twinnem,
-                isOwner = false
-            ),
-            AuctionItem(
-                "mug",
-                "Adrian Butiu Limited Mug",
-                "Limited edition.",
-                "₱500",
-                R.drawable.sample_mug,
-                isOwner = false
-            ),
-            AuctionItem(
-                "tee",
-                "Adrian Butiu Limited Tee",
-                "Customized t-shirt.",
-                "₱1,000",
-                R.drawable.sample_tee_wacky,
-                isOwner = false
-            ),
-            AuctionItem(
-                "cal",
-                "Adrian Butiu Calendar",
-                "2024 calendar.",
-                "₱300",
-                R.drawable.sample_calendar,
-                isOwner = false
-            )
-        )
+    val viewModel: TransactionViewModel = viewModel()
+    val transactions by viewModel.transactions.collectAsState()
+    val user = UserSesssion.user
+
+    LaunchedEffect(Unit) {
+        user?.userId?.let { viewModel.getAuctions(it) }
     }
 
     Column(
@@ -136,16 +108,15 @@ fun Auctions(navController: NavController) {
 
             Spacer(Modifier.height(16.dp))
 
-            // Replaced filteredItems with sampleItems directly
-            if (sampleItems.isEmpty()) {
+            if (transactions.isEmpty()) {
                 Text(
                     text = "No transactions found.",
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 20.dp).align(Alignment.CenterHorizontally)
                 )
             } else {
-                sampleItems.forEach { item ->
-                    TransactionHistoryCard(item = item)
+                transactions.forEach { transaction ->
+                    TransactionHistoryCard(transaction = transaction)
                     Spacer(Modifier.height(12.dp))
                 }
             }

@@ -1,4 +1,4 @@
-package com.payamanan.auctionfrontend
+package com.payamanan.auctionfrontend.viewModels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

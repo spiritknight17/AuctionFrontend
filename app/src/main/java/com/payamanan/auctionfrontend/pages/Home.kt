@@ -1,6 +1,5 @@
 package com.payamanan.auctionfrontend.pages
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,59 +16,47 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.payamanan.auctionfrontend.sharedComponents.HostedAuctionCard
 import com.payamanan.auctionfrontend.R
+import com.payamanan.auctionfrontend.data.UserSesssion
+import com.payamanan.auctionfrontend.data.model.Auction
+import com.payamanan.auctionfrontend.data.model.Item
 import com.payamanan.auctionfrontend.dialogs.AuctionFormDialog
 import com.payamanan.auctionfrontend.dialogs.EndAuctionDialog
 import com.payamanan.auctionfrontend.sharedComponents.AddItemCard
 import com.payamanan.auctionfrontend.sharedComponents.AuctionCard
 import com.payamanan.auctionfrontend.sharedComponents.BottomNavBar
+import com.payamanan.auctionfrontend.sharedComponents.HostedAuctionCard
 import com.payamanan.auctionfrontend.ui.theme.BgGray
 import com.payamanan.auctionfrontend.ui.theme.GoldBtn
 import com.payamanan.auctionfrontend.ui.theme.HostingBg
 import com.payamanan.auctionfrontend.ui.theme.OliveGreen
+import com.payamanan.auctionfrontend.viewModels.AuctionViewModel
+import com.payamanan.auctionfrontend.viewModels.ItemViewModel
+import java.util.Date
 
 val InriaSerif = FontFamily(Font(R.font.inriaserifregular))
 val InterFont  = FontFamily(
     Font(R.font.inter, FontWeight.Normal),
-    Font(R.font.inter18ptbold, FontWeight.Bold) // Assuming inter_bold based on previous corrections
+    Font(R.font.inter18ptbold, FontWeight.Bold)
 )
 
-// ── Data model ────────────────────────────────────────────────────────────────
-data class AuctionItem(
-    val id          : String,
-    val title       : String,
-    val description : String = "",
-    val price       : String,
-    val imageRes    : Int? = null,
-    val imageUri    : Uri? = null,
-    val isOwner     : Boolean = false
-)
-
-// ── Screen ────────────────────────────────────────────────────────────────────
 @Composable
 fun Home(navController: NavController) {
+    val user = UserSesssion.user
+    val auctionViewModel: AuctionViewModel = viewModel()
+    val itemViewModel: ItemViewModel = viewModel()
 
-    val sampleItems = remember {
-        mutableStateListOf(
-            AuctionItem("add", "", "",                         "",                   null),
-            AuctionItem("tee-t", "Adrian Butiu Limited Tee - Twinnem", "Cotton Tee worn by Balong", "₱500",   R.drawable.sample_tee_twinnem, isOwner = true),
-            AuctionItem("cal", "Adrian Butiu Calendar",    "2024 calendar.", "₱300",   R.drawable.sample_calendar, isOwner = false),
-            AuctionItem("mug", "Adrian Butiu Limited Mug", "Limited edition mug.", "₱500",   R.drawable.sample_mug,      isOwner = false),
-            AuctionItem("tee", "Adrian Butiu Limited Tee", "Customized t-shirt.", "₱1,000", R.drawable.sample_tee_wacky, isOwner = false),
-            AuctionItem("cal2", "Adrian Butiu Calendar",    "2024 calendar.", "₱300",   R.drawable.sample_calendar, isOwner = false)
-        )
-    }
+    val auctions by auctionViewModel.auctions.collectAsState()
+    
 
-    val scrollState = rememberScrollState()
-    var selectedTab by remember { mutableIntStateOf(1) } // Default to Home (middle)
-
-    // Dialog states
     var showEditDialog by remember { mutableStateOf(false) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showEndAuctionDialog by remember { mutableStateOf(false) }
-    var selectedItemForDialog by remember { mutableStateOf<AuctionItem?>(null) }
+    var selectedAuctionForDialog by remember { mutableStateOf<Auction?>(null) }
+    val scrollState = rememberScrollState()
+    var selectedTab by remember { mutableIntStateOf(1) }
 
     Scaffold(
         containerColor = Color.White,
@@ -85,11 +72,11 @@ fun Home(navController: NavController) {
                     onTabSelected = { idx ->
                         selectedTab = idx
                         when (idx) {
-                            0 -> navController.navigate("auctions") // History
+                            0 -> navController.navigate("auctions")
                             1 -> { /* home */
                             }
 
-                            2 -> navController.navigate("account")  // User
+                            2 -> navController.navigate("account")
                         }
                     }
                 )
@@ -105,7 +92,7 @@ fun Home(navController: NavController) {
                 .verticalScroll(scrollState)
         ) {
 
-            // ── Top bar ───────────────────────────────────────────────────────
+
             Row(
                 modifier          = Modifier
                     .fillMaxWidth()
@@ -121,7 +108,7 @@ fun Home(navController: NavController) {
                         color      = GoldBtn
                     )
                     Text(
-                        text       = "Ivy Timoteo",
+                        text       = user?.username ?: "Guest",
                         fontFamily = InterFont,
                         fontWeight = FontWeight.Bold,
                         fontSize   = 22.sp,
@@ -130,7 +117,7 @@ fun Home(navController: NavController) {
                 }
             }
 
-            // ── Payamanan title ───────────────────────────────────────────────
+
             Text(
                 text       = "Payamanan",
                 fontFamily = InriaSerif,
@@ -142,44 +129,49 @@ fun Home(navController: NavController) {
 
             Spacer(Modifier.height(16.dp))
 
-            // ── SECTION: Hosting ─────────────────────────────────────────────
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(HostingBg)
                     .padding(vertical = 24.dp, horizontal = 12.dp)
             ) {
-                // Simplified filtering: Just grab owned items and the "add" button
-                val hostedItems = sampleItems.filter { it.isOwner || it.id == "add" }
+
+                val hostedAuctions = auctions.filter { it.item.seller.userId == user?.userId }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    hostedItems.take(2).forEach { item ->
+
+                     Box(modifier = Modifier.weight(1f)) {
+                        AddItemCard(onClick = { 
+
+                             val dummyItem = Item(null, "", "", user!!)
+                             selectedAuctionForDialog = Auction(null, dummyItem, 0f, null, Date(), Date(), "ACTIVE")
+                             showAddDialog = true 
+                        })
+                     }
+                    
+                    hostedAuctions.take(1).forEach { auction ->
                         Box(modifier = Modifier.weight(1f)) {
-                            if (item.id == "add") {
-                                AddItemCard(onClick = { showAddDialog = true })
-                            } else {
-                                HostedAuctionCard(
-                                    item = item,
-                                    onEditClick = {
-                                        selectedItemForDialog = item
-                                        showEditDialog = true
-                                    },
-                                    onEndAuctionClick = {
-                                        selectedItemForDialog = item
-                                        showEndAuctionDialog = true
-                                    }
-                                )
-                            }
+                            HostedAuctionCard(
+                                auction = auction,
+                                onEditClick = {
+                                    selectedAuctionForDialog = auction
+                                    showEditDialog = true
+                                },
+                                onEndAuctionClick = {
+                                    selectedAuctionForDialog = auction
+                                    showEndAuctionDialog = true
+                                }
+                            )
                         }
                     }
-                    if (hostedItems.size == 1) Spacer(Modifier.weight(1f))
+                    if (hostedAuctions.isEmpty()) Spacer(Modifier.weight(1f))
                 }
             }
 
-            // ── SECTION: Bidding (Popular Auctions) ──────────────────────────
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -195,18 +187,18 @@ fun Home(navController: NavController) {
                     color      = Color.White,
                     modifier   = Modifier.padding(start = 8.dp, bottom = 16.dp)
                 )
-                val biddingItems = sampleItems.filter { !it.isOwner && it.id != "add" }
-                val rows = biddingItems.chunked(2)
+                val biddingAuctions = auctions.filter { it.item.seller.userId != user?.userId }
+                val rows = biddingAuctions.chunked(2)
                 rows.forEach { rowItems ->
                     Row(
                         modifier              = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        rowItems.forEach { item ->
+                        rowItems.forEach { auction ->
                             Box(modifier = Modifier.weight(1f)) {
                                 AuctionCard(
-                                    item = item,
-                                    onBidClick = { navController.navigate("product-page/${item.id}") }
+                                    auction = auction,
+                                    onBidClick = { navController.navigate("product-page/${auction.id}") }
                                 )
                             }
                         }
@@ -216,57 +208,34 @@ fun Home(navController: NavController) {
                 }
             }
         }
-        if (showAddDialog) {
+        
+        if (showAddDialog && selectedAuctionForDialog != null) {
             AuctionFormDialog(
-                title = "Add Item to Auction",
-                confirmLabel = "Add Item",
+                auction = selectedAuctionForDialog!!,
                 onDismiss = { showAddDialog = false },
-                onConfirm = { name, desc, price, uri ->
-                    sampleItems.add(
-                        AuctionItem(
-                            id = "item_${sampleItems.size}",
-                            title = name,
-                            description = desc,
-                            price = "₱$price",
-                            imageUri = uri,
-                            isOwner = true
-                        )
-                    )
+                onConfirm = { newAuction ->
+                     auctionViewModel.createAuction(newAuction)
                     showAddDialog = false
                 }
             )
         }
 
-        if (showEditDialog && selectedItemForDialog != null) {
+        if (showEditDialog && selectedAuctionForDialog != null) {
             AuctionFormDialog(
-                title = "Edit Item to Auction",
-                confirmLabel = "Save Changes",
-                initialName = selectedItemForDialog!!.title,
-                initialDesc = selectedItemForDialog!!.description,
-                initialPrice = selectedItemForDialog!!.price.replace("₱", "").replace(",", ""),
-                initialUri = selectedItemForDialog!!.imageUri,
+                auction = selectedAuctionForDialog!!,
                 onDismiss = { showEditDialog = false },
-                onConfirm = { name, desc, price, uri ->
-                    val index = sampleItems.indexOfFirst { it.id == selectedItemForDialog!!.id }
-                    if (index != -1) {
-                        sampleItems[index] = selectedItemForDialog!!.copy(
-                            title = name,
-                            description = desc,
-                            price = "₱$price",
-                            imageUri = uri
-                        )
-                    }
+                onConfirm = { updatedAuction ->
+                     auctionViewModel.createAuction(updatedAuction)
                     showEditDialog = false
                 }
             )
         }
 
-        if (showEndAuctionDialog && selectedItemForDialog != null) {
+        if (showEndAuctionDialog && selectedAuctionForDialog != null) {
             EndAuctionDialog(
-                item = selectedItemForDialog!!,
+                auction = selectedAuctionForDialog!!,
                 onDismiss = { showEndAuctionDialog = false },
                 onConfirm = {
-                    sampleItems.removeIf { it.id == selectedItemForDialog?.id }
                     showEndAuctionDialog = false
                 }
             )

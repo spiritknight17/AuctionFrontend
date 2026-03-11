@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.payamanan.auctionfrontend.pages.AuctionItem
+import com.payamanan.auctionfrontend.data.model.Auction
 import com.payamanan.auctionfrontend.pages.InterFont
 import com.payamanan.auctionfrontend.ui.theme.TextDark
 import com.payamanan.auctionfrontend.ui.theme.AlertRed
@@ -20,7 +20,7 @@ import com.payamanan.auctionfrontend.ui.theme.GoldBtn
 
 @Composable
 fun HostedAuctionCard(
-    item: AuctionItem,
+    auction: Auction,
     onEditClick: () -> Unit,
     onEndAuctionClick: () -> Unit
 ) {
@@ -41,7 +41,7 @@ fun HostedAuctionCard(
         ) {
             Column(modifier = Modifier.weight(1.1f)) {
                 Text(
-                    text = item.title,
+                    text = auction.item.name,
                     fontFamily = InterFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
@@ -51,7 +51,7 @@ fun HostedAuctionCard(
                     lineHeight = 16.sp
                 )
                 Text(
-                    text = item.price,
+                    text = "₱${auction.startingPrice}",
                     fontFamily = InterFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,

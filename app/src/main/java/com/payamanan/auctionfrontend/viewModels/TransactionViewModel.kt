@@ -1,12 +1,9 @@
-package com.payamanan.auctionfrontend
+package com.payamanan.auctionfrontend.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.payamanan.auctionfrontend.data.model.Auction
 import com.payamanan.auctionfrontend.data.model.Transaction
-import com.payamanan.auctionfrontend.data.model.User
 import com.payamanan.auctionfrontend.data.remote.TransactionApi
-import com.payamanan.auctionfrontend.data.remote.UserApi
 import com.payamanan.auctionfrontend.di.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

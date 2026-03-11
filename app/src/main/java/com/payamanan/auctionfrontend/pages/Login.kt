@@ -19,10 +19,29 @@ import com.payamanan.auctionfrontend.ui.theme.InriaSerif
 import com.payamanan.auctionfrontend.ui.theme.Inter
 import androidx.compose.runtime.*
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.payamanan.auctionfrontend.R
+import com.payamanan.auctionfrontend.data.ApiState
+import com.payamanan.auctionfrontend.data.model.User
+import com.payamanan.auctionfrontend.viewModels.UserViewModel
 
 @Composable
 fun Login(navController: NavController) {
+    val userViewModel: UserViewModel = viewModel()
+    val userState by userViewModel.userState.collectAsState()
+
+    var usernameOrEmail by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    LaunchedEffect(userState) {
+        if (userState is ApiState.Success) {
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
+            userViewModel.resetState()
+        }
+    }
+
     Surface( modifier = Modifier.fillMaxSize(), color = Color(0xFF495C26)){
         Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(modifier = Modifier.height(40.dp))
@@ -40,10 +59,10 @@ fun Login(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(text = "Login", modifier = Modifier.align(Alignment.CenterHorizontally), style = TextStyle(color = Color(0xFFB1822C), fontSize = 40.sp, fontFamily = InriaSerif, fontWeight = FontWeight.Bold))
                     Text(text = "Username/Email", style = TextStyle(color = Color(0xFFB1822C), fontSize = 16.sp, fontFamily = Inter, fontWeight = FontWeight.Normal, textAlign = TextAlign.Left))
-                    var username by remember { mutableStateOf("") }
+                    
                     OutlinedTextField(
-                        value = username,
-                        onValueChange = { username = it },
+                        value = usernameOrEmail,
+                        onValueChange = { usernameOrEmail = it },
                         placeholder = { Text("Enter Username/Email...", color = Color(0xFFB1822C).copy(alpha = 0.5f)) },
                         shape = RoundedCornerShape(15.dp),
                         modifier = Modifier.fillMaxWidth(),
@@ -58,7 +77,7 @@ fun Login(navController: NavController) {
                         )
                     )
                     Text(text = "Password", style = TextStyle(color = Color(0xFFB1822C), fontSize = 16.sp, fontFamily = Inter, fontWeight = FontWeight.Normal, textAlign = TextAlign.Left))
-                    var password by remember { mutableStateOf("") }
+                    
                     OutlinedTextField(
 
                         value = password,
@@ -77,12 +96,40 @@ fun Login(navController: NavController) {
                             focusedLabelColor = Color(0xFFB1822C)
                         )
                     )
+                    
+                    if (userState is ApiState.Error) {
+                        Text(
+                            text = (userState as ApiState.Error).message,
+                            color = Color.Red,
+                            fontSize = 14.sp,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
+
                     Button(
-                        onClick = { navController.navigate("home") },
+                        onClick = {
+                            val isEmail = usernameOrEmail.contains("@")
+                            val user = User(
+                                userId = null,
+                                username = if (!isEmail) usernameOrEmail else null,
+                                email = if (isEmail) usernameOrEmail else "",
+                                passwordHash = password,
+                                role = null,
+                                status = null
+                            )
+                            userViewModel.login(user)
+                        },
                         modifier = Modifier.fillMaxWidth().height(50.dp),
                         shape = RoundedCornerShape(15.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF495C26))
-                    ) { Text("Login") }
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF495C26)),
+                        enabled = userState !is ApiState.Loading
+                    ) { 
+                        if (userState is ApiState.Loading) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                        } else {
+                            Text("Login") 
+                        }
+                    }
 
                     Button(
                         onClick = { navController.navigate("signup") },

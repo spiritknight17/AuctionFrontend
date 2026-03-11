@@ -1,15 +1,11 @@
 package com.payamanan.auctionfrontend.pages
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -21,37 +17,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-
-private val OliveGreen = Color(0xFF4A5C2F)
-private val GoldYellow = Color(0xFFC8962A)
-private val OffWhite   = Color(0xFFF5F5F0)
-private val DarkText   = Color(0xFF1A1A1A)
-private val SubtleGray = Color(0xFF888888)
-private val BorderGray = Color(0xFFDDDDDD)
+import com.payamanan.auctionfrontend.data.UserSesssion
+import com.payamanan.auctionfrontend.ui.theme.BorderGray
+import com.payamanan.auctionfrontend.ui.theme.GoldYellow
+import com.payamanan.auctionfrontend.ui.theme.OffWhite
+import com.payamanan.auctionfrontend.ui.theme.OliveGreen
+import com.payamanan.auctionfrontend.sharedComponents.ProfileField
 
 @Composable
 fun Account(navController: NavController) {
-
-    var fullName        by remember { mutableStateOf("Ivy Timoteo") }
-    var username        by remember { mutableStateOf("nirpt") }
-    var email           by remember { mutableStateOf("ivytimoteo@hotmail.com") }
-    var currentPassword by remember { mutableStateOf("") }
-    var newPassword     by remember { mutableStateOf("") }
-
-    // Holds the URI of the photo the user picked — null means show the default drawable
-    var profileImageUri by remember { mutableStateOf<Uri?>(null) }
-
-    // Launches the system photo picker
-    val photoPickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        if (uri != null) profileImageUri = uri
-    }
+    val user = UserSesssion.user
+    var username by remember { mutableStateOf(user?.username ?: "") }
+    var email by remember { mutableStateOf(user?.email ?: "") }
+    var currentPassword by remember { mutableStateOf(user?.passwordHash ?: "") }
 
     Column(
         modifier = Modifier
@@ -63,7 +44,6 @@ fun Account(navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        // ── Header ────────────────────────────────────────────────────────────
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -102,10 +82,6 @@ fun Account(navController: NavController) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // ── Form fields ───────────────────────────────────────────────────────
-        ProfileField(label = "Full Name", value = fullName, onValueChange = { fullName = it })
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         ProfileField(label = "Username", value = username, onValueChange = { username = it })
 
@@ -127,18 +103,8 @@ fun Account(navController: NavController) {
             isPassword = true
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ProfileField(
-            label = "New Password",
-            value = newPassword,
-            onValueChange = { newPassword = it },
-            isPassword = true
-        )
-
         Spacer(modifier = Modifier.height(32.dp))
 
-        // ── Save Changes button ───────────────────────────────────────────────
         Button(
             onClick = { /* TODO: save changes */ },
             modifier = Modifier
@@ -154,44 +120,5 @@ fun Account(navController: NavController) {
                 fontWeight = FontWeight.SemiBold
             )
         }
-    }
-}
-
-@Composable
-private fun ProfileField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    isPassword: Boolean = false,
-    keyboardType: KeyboardType = KeyboardType.Text
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            color = SubtleGray,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Normal
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            shape = RoundedCornerShape(10.dp),
-            visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = OliveGreen,
-                unfocusedBorderColor = BorderGray,
-                focusedTextColor = DarkText,
-                unfocusedTextColor = DarkText,
-                cursorColor = OliveGreen,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
-            )
-        )
     }
 }

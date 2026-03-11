@@ -22,13 +22,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.payamanan.auctionfrontend.pages.AuctionItem
+import com.payamanan.auctionfrontend.data.model.Auction
 import com.payamanan.auctionfrontend.pages.InterFont
 import com.payamanan.auctionfrontend.ui.theme.GoldBtn
 import com.payamanan.auctionfrontend.ui.theme.TextDark
 
 @Composable
-fun AuctionCard(item: AuctionItem, onBidClick: () -> Unit) {
+fun AuctionCard(auction: Auction, onBidClick: () -> Unit) {
     Card(
         modifier  = Modifier.fillMaxWidth(),
         shape     = RoundedCornerShape(20.dp),
@@ -37,10 +37,10 @@ fun AuctionCard(item: AuctionItem, onBidClick: () -> Unit) {
     ) {
         Column {
             Column(modifier = Modifier.padding(12.dp)) {
-                Text(text = item.title, fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextDark, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(text = auction.item.name, fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextDark, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Spacer(Modifier.height(4.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = item.price, fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextDark)
+                    Text(text = "₱${auction.startingPrice}", fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextDark)
                     Button(
                         onClick = onBidClick,
                         shape = RoundedCornerShape(12.dp),
