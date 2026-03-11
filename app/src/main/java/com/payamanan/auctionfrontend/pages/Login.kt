@@ -1,4 +1,5 @@
 package com.payamanan.auctionfrontend.pages
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -33,12 +34,22 @@ fun Login(navController: NavController) {
     var usernameOrEmail by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
+    // Custom state to hold validation/API error messages
+    var localError by remember { mutableStateOf("") }
+
     LaunchedEffect(userState) {
-        if (userState is ApiState.Success) {
-            navController.navigate("home") {
-                popUpTo("login") { inclusive = true }
+        when (userState) {
+            is ApiState.Success -> {
+                navController.navigate("home") {
+                    popUpTo("login") { inclusive = true }
+                }
+                userViewModel.resetState()
             }
-            userViewModel.resetState()
+            is ApiState.Error -> {
+                // Override standard HTTP exception messages with a custom user-friendly error
+                localError = "Username/Email and Password do not match."
+            }
+            else -> {}
         }
     }
 
@@ -55,14 +66,18 @@ fun Login(navController: NavController) {
                 color = Color.White
             ) {
                 Column(modifier = Modifier.padding(24.dp),
-
                     verticalArrangement = Arrangement.spacedBy(16.dp)) {
+
                     Text(text = "Login", modifier = Modifier.align(Alignment.CenterHorizontally), style = TextStyle(color = Color(0xFFB1822C), fontSize = 40.sp, fontFamily = InriaSerif, fontWeight = FontWeight.Bold))
+
                     Text(text = "Username/Email", style = TextStyle(color = Color(0xFFB1822C), fontSize = 16.sp, fontFamily = Inter, fontWeight = FontWeight.Normal, textAlign = TextAlign.Left))
-                    
+
                     OutlinedTextField(
                         value = usernameOrEmail,
-                        onValueChange = { usernameOrEmail = it },
+                        onValueChange = {
+                            usernameOrEmail = it
+                            localError = "" // Clear error as user types
+                        },
                         placeholder = { Text("Enter Username/Email...", color = Color(0xFFB1822C).copy(alpha = 0.5f)) },
                         shape = RoundedCornerShape(15.dp),
                         modifier = Modifier.fillMaxWidth(),
@@ -76,12 +91,15 @@ fun Login(navController: NavController) {
                             focusedLabelColor = Color(0xFFB1822C)
                         )
                     )
-                    Text(text = "Password", style = TextStyle(color = Color(0xFFB1822C), fontSize = 16.sp, fontFamily = Inter, fontWeight = FontWeight.Normal, textAlign = TextAlign.Left))
-                    
-                    OutlinedTextField(
 
+                    Text(text = "Password", style = TextStyle(color = Color(0xFFB1822C), fontSize = 16.sp, fontFamily = Inter, fontWeight = FontWeight.Normal, textAlign = TextAlign.Left))
+
+                    OutlinedTextField(
                         value = password,
-                        onValueChange = { password = it },
+                        onValueChange = {
+                            password = it
+                            localError = "" // Clear error as user types
+                        },
                         placeholder = { Text("Enter Password...", color = Color(0xFFB1822C).copy(alpha = 0.5f)) },
                         visualTransformation = PasswordVisualTransformation(),
                         shape = RoundedCornerShape(15.dp),
@@ -96,23 +114,31 @@ fun Login(navController: NavController) {
                             focusedLabelColor = Color(0xFFB1822C)
                         )
                     )
-                    
-                    if (userState is ApiState.Error) {
+
+                    // Display our custom local error message
+                    if (localError.isNotEmpty()) {
                         Text(
-                            text = (userState as ApiState.Error).message,
+                            text = localError,
                             color = Color.Red,
                             fontSize = 14.sp,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            textAlign = TextAlign.Center
                         )
                     }
 
                     Button(
                         onClick = {
-                            val isEmail = usernameOrEmail.contains("@")
+                            if (usernameOrEmail.isBlank() || password.isBlank()) {
+                                localError = "Please fill in all fields."
+                                return@Button
+                            }
+
+                            // Pass the input to both username and email properties
+                            // so the backend can validate it smoothly against the database
                             val user = User(
                                 userId = null,
-                                username = if (!isEmail) usernameOrEmail else null,
-                                email = if (isEmail) usernameOrEmail else "",
+                                username = usernameOrEmail,
+                                email = usernameOrEmail,
                                 passwordHash = password,
                                 role = null,
                                 status = null
@@ -123,11 +149,11 @@ fun Login(navController: NavController) {
                         shape = RoundedCornerShape(15.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF495C26)),
                         enabled = userState !is ApiState.Loading
-                    ) { 
+                    ) {
                         if (userState is ApiState.Loading) {
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                         } else {
-                            Text("Login") 
+                            Text("Login")
                         }
                     }
 
