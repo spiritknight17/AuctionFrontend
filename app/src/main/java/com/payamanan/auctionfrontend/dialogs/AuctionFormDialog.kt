@@ -43,6 +43,7 @@ fun AuctionFormDialog(
     onDismiss: () -> Unit,
     onConfirm: (Auction) -> Unit
 ) {
+    var name by remember { mutableStateOf(auction.item.name) }
     var desc by remember { mutableStateOf(auction.item.description) }
     var price by remember { mutableStateOf(auction.startingPrice.toString()) }
 
@@ -68,7 +69,7 @@ fun AuctionFormDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = auction.item.name, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextDark)
+                    Text(text = "Edit Item to Auction", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TextDark)
                     IconButton(onClick = onDismiss, modifier = Modifier.size(24.dp)) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Gray)
                     }
@@ -76,6 +77,11 @@ fun AuctionFormDialog(
 
                 Spacer(Modifier.height(24.dp))
 
+                DialogTextField(
+                    label = "Item Name",
+                    value = name,
+                    onValueChange = { name = it })
+                Spacer(Modifier.height(16.dp))
                 DialogTextField(
                     label = "Item Description",
                     value = desc,
@@ -91,7 +97,7 @@ fun AuctionFormDialog(
                 Button(
                     onClick = {
                         val newPrice = price.toFloatOrNull() ?: auction.startingPrice
-                        val updatedItem = auction.item.copy(description = desc)
+                        val updatedItem = auction.item.copy(name = name, description = desc)
                         val updatedAuction = auction.copy(item = updatedItem, startingPrice = newPrice)
                         onConfirm(updatedAuction)
                     },
@@ -101,7 +107,7 @@ fun AuctionFormDialog(
                     shape = RoundedCornerShape(24.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = GoldBtn)
                 ) {
-                    Text(text = "Save", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(text = "Save Changes", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         }
