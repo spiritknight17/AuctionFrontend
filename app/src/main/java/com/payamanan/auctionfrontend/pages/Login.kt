@@ -48,6 +48,7 @@ fun Login(navController: NavController) {
             is ApiState.Error -> {
                 // Override standard HTTP exception messages with a custom user-friendly error
                 localError = "Username/Email and Password do not match."
+                userViewModel.resetState()
             }
             else -> {}
         }

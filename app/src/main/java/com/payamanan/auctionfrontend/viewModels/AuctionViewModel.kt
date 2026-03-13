@@ -1,5 +1,6 @@
 package com.payamanan.auctionfrontend.viewModels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.payamanan.auctionfrontend.data.model.Auction
@@ -25,6 +26,7 @@ class AuctionViewModel: ViewModel() {
         viewModelScope.launch {
             try {
                 auctionApi.createAuction(auction)
+                getAuctions()
             }catch (e: Exception) {
                 print(e.message)
             }
@@ -46,6 +48,7 @@ class AuctionViewModel: ViewModel() {
         viewModelScope.launch {
             try {
                 auctionApi.bidAuction(auctionId, bidRequest)
+                getAuctions()
             }catch (e: Exception) {
                 print(e.message)
             }

@@ -19,8 +19,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.payamanan.auctionfrontend.R
+import com.payamanan.auctionfrontend.data.ApiState
 import com.payamanan.auctionfrontend.data.UserSesssion
 import com.payamanan.auctionfrontend.data.model.Auction
+import com.payamanan.auctionfrontend.data.model.BidRequest
 import com.payamanan.auctionfrontend.data.model.Item
 import com.payamanan.auctionfrontend.dialogs.AuctionFormDialog
 import com.payamanan.auctionfrontend.dialogs.EndAuctionDialog
@@ -36,6 +38,7 @@ import com.payamanan.auctionfrontend.viewModels.AuctionViewModel
 import com.payamanan.auctionfrontend.viewModels.ItemViewModel
 import java.util.Date
 
+
 val InriaSerif = FontFamily(Font(R.font.inriaserifregular))
 val InterFont  = FontFamily(
     Font(R.font.inter, FontWeight.Normal),
@@ -47,16 +50,25 @@ fun Home(navController: NavController) {
     val user = UserSesssion.user
     val auctionViewModel: AuctionViewModel = viewModel()
     val itemViewModel: ItemViewModel = viewModel()
-
+    val items by itemViewModel.items.collectAsState()
     val auctions by auctionViewModel.auctions.collectAsState()
+    val itemState by itemViewModel.itemState.collectAsState()
     
 
     var showEditDialog by remember { mutableStateOf(false) }
     var showAddDialog by remember { mutableStateOf(false) }
     var showEndAuctionDialog by remember { mutableStateOf(false) }
+    var selectedItemForDialog by remember { mutableStateOf<Item?>(null) }
     var selectedAuctionForDialog by remember { mutableStateOf<Auction?>(null) }
     val scrollState = rememberScrollState()
     var selectedTab by remember { mutableIntStateOf(1) }
+    LaunchedEffect(itemState) {
+        if (itemState is ApiState.Success) {
+            itemViewModel.getItems()
+            itemViewModel.resetState()
+            showAddDialog = false
+        }
+    }
 
     Scaffold(
         containerColor = Color.White,
@@ -144,14 +156,21 @@ fun Home(navController: NavController) {
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
 
-                     Box(modifier = Modifier.weight(1f)) {
-                        AddItemCard(onClick = { 
-
-                             val dummyItem = Item(null, "", "", user!!)
-                             selectedAuctionForDialog = Auction(null, dummyItem, 0f, null, Date(), Date(), "ACTIVE")
-                             showAddDialog = true 
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(Color.Red)
+                    ) {
+                        AddItemCard(onClick = {
+                            selectedItemForDialog = Item(
+                                id = null,
+                                name = "",
+                                description = "",
+                                seller = user!!
+                            )
+                            showAddDialog = true
                         })
-                     }
+                    }
                     
                     hostedAuctions.take(1).forEach { auction ->
                         Box(modifier = Modifier.weight(1f)) {
@@ -208,28 +227,27 @@ fun Home(navController: NavController) {
                 }
             }
         }
-        
-        if (showAddDialog && selectedAuctionForDialog != null) {
+
+        if (showAddDialog && selectedItemForDialog != null) {
             AuctionFormDialog(
-                auction = selectedAuctionForDialog!!,
+                item = selectedItemForDialog!!,
                 onDismiss = { showAddDialog = false },
-                onConfirm = { newAuction ->
-                     auctionViewModel.createAuction(newAuction)
-                    showAddDialog = false
+                onConfirm = { newItem ->
+                    itemViewModel.createItem(newItem)
                 }
             )
         }
 
-        if (showEditDialog && selectedAuctionForDialog != null) {
-            AuctionFormDialog(
+        /*if (showEditDialog && selectedAuctionForDialog != null) {
+            AuctionFormDialog( // Ensure this still exists or update it to ItemFormDialog too
                 auction = selectedAuctionForDialog!!,
                 onDismiss = { showEditDialog = false },
                 onConfirm = { updatedAuction ->
-                     auctionViewModel.createAuction(updatedAuction)
+                    auctionViewModel.createAuction(updatedAuction)
                     showEditDialog = false
                 }
             )
-        }
+        }*/
 
         if (showEndAuctionDialog && selectedAuctionForDialog != null) {
             EndAuctionDialog(

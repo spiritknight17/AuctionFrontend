@@ -37,8 +37,7 @@ class ItemViewModel : ViewModel() {
             try {
                 val response = itemApi.getItems()
                 _items.value = response
-            }catch (e: Exception) {
-                print(e.message)
+            } catch (e: Exception) {
             }
         }
     }

@@ -120,5 +120,11 @@ fun Account(navController: NavController) {
                 fontWeight = FontWeight.SemiBold
             )
         }
+        Button(
+            onClick = { navController.navigate("login") },
+            modifier = Modifier.fillMaxWidth().height(50.dp),
+            shape = RoundedCornerShape(15.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+        ) { Text("Log Out", color = Color(0xFFFF0000), fontSize = 16.sp, fontWeight = FontWeight.Bold) }
     }
 }

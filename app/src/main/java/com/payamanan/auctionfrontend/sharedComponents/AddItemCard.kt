@@ -56,7 +56,7 @@ fun AddItemCard(onClick: () -> Unit) {
             }
             Spacer(Modifier.height(12.dp))
             Text(
-                text = "Add Item\nto\nAuction",
+                text = "Add Item\nto be\nAuctioned",
                 fontFamily = InterFont,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
