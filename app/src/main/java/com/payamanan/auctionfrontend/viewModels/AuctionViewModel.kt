@@ -72,6 +72,7 @@ class AuctionViewModel: ViewModel() {
                     status = "ACTIVE"
                 )
                 auctionApi.createAuction(newAuction)
+                createAuction(newAuction)
                 getAuctions()
             } catch (e: Exception) {
                 Log.e("AuctionViewModel", "Failed to start auction: ${e.message}")
