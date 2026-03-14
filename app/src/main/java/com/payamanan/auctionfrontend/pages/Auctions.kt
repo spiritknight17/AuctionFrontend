@@ -48,10 +48,12 @@ val Interfont = FontFamily(Font(R.font.inter, FontWeight.Normal), Font(R.font.in
 @Composable
 fun Auctions(navController: NavController) {
     val scrollState = rememberScrollState()
-
     val viewModel: ItemViewModel = viewModel()
-    val items by viewModel.items.collectAsState()
     val user = UserSesssion.user
+    val allItems by viewModel.items.collectAsState()
+    val myItems = remember(allItems, user) {
+        allItems.filter { it.seller.userId == user?.userId }
+    }
 
     var showAuctionDialog by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf<Item?>(null) }
@@ -119,7 +121,7 @@ fun Auctions(navController: NavController) {
 
             Spacer(Modifier.height(16.dp))
 
-            if (items.isEmpty()) {
+            if (myItems.isEmpty()) {
                 Text(
                     text = "No Items found.",
                     color = Color.Gray,
@@ -128,7 +130,7 @@ fun Auctions(navController: NavController) {
                         .align(Alignment.CenterHorizontally)
                 )
             } else {
-                items.forEach { item ->
+                myItems.forEach { item ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

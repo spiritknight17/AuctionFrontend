@@ -29,27 +29,53 @@ import com.payamanan.auctionfrontend.ui.theme.TextDark
 
 @Composable
 fun AuctionCard(auction: Auction, onBidClick: () -> Unit) {
+    val priceToDisplay = if (auction.hasValidBid) {
+        "Current Bid: ₱${String.format("%,.2f", auction.currentBid?.offeredPrice ?: 0f)}"
+    } else {
+        "Starting at: ₱${String.format("%,.2f", auction.startingPrice)}"
+    }
+    val price = auction.currentBid?.offeredPrice ?: auction.startingPrice
+    val priceLabel = if (auction.currentBid == null) "Starting at: " else "Current Bid: "
+    val formattedPrice = String.format("₱%,.2f", price)
     Card(
         modifier  = Modifier.fillMaxWidth(),
         shape     = RoundedCornerShape(20.dp),
         colors    = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
-        Column {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text(text = auction.item.name, fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextDark, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Spacer(Modifier.height(4.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "₱${auction.startingPrice}", fontFamily = InterFont, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextDark)
-                    Button(
-                        onClick = onBidClick,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = GoldBtn),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                        modifier = Modifier.height(30.dp)
-                    ) {
-                        Text(text = "Place a Bid", fontSize = 11.sp, color = Color.White)
-                    }
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = auction.item.name,
+                fontFamily = InterFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = TextDark,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(4.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "$priceLabel$formattedPrice",
+                    fontFamily = InterFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = TextDark
+                )
+
+                Button(
+                    onClick = onBidClick,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = GoldBtn),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                    modifier = Modifier.height(30.dp)
+                ) {
+                    Text(text = "Place a Bid", fontSize = 11.sp, color = Color.White)
                 }
             }
         }

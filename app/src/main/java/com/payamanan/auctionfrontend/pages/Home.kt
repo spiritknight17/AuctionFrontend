@@ -206,7 +206,37 @@ fun Home(navController: NavController) {
                     color      = Color.White,
                     modifier   = Modifier.padding(start = 8.dp, bottom = 16.dp)
                 )
-                val biddingAuctions = auctions.filter { it.item.seller.userId != user?.userId }
+                val biddingAuctions = auctions
+                if (biddingAuctions.isEmpty()) {
+                    Text(
+                        text = "No active auctions available right now.",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontFamily = InterFont,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                } else {
+                    val rows = biddingAuctions.chunked(2)
+
+                    rows.forEach { rowItems ->
+                        Row(
+                            modifier              = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            rowItems.forEach { auction ->
+                                Box(modifier = Modifier.weight(1f)) {
+                                    AuctionCard(
+                                        auction = auction,
+                                        onBidClick = { navController.navigate("product-page/${auction.id}") }
+                                    )
+                                }
+                            }
+                            if (rowItems.size == 1) {
+                                Spacer(Modifier.weight(1f))
+                            }
+                        }
+                        Spacer(Modifier.height(16.dp))
+                    }
+                }
                 val rows = biddingAuctions.chunked(2)
                 rows.forEach { rowItems ->
                     Row(

@@ -1,5 +1,6 @@
 package com.payamanan.auctionfrontend.data.model
 
+import com.google.gson.annotations.SerializedName
 import java.util.Date
 
 data class Auction(
@@ -10,4 +11,6 @@ data class Auction(
     val startTime: Date,
     val endTime: Date,
     val status: String
-)
+){
+    val hasValidBid: Boolean get() = currentBid != null
+}
