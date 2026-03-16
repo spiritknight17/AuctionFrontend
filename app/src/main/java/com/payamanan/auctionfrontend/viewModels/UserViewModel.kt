@@ -49,7 +49,7 @@ class UserViewModel: ViewModel() {
         viewModelScope.launch {
             _userState.value = ApiState.Loading
             try {
-                val response = userApi.get(id)
+                val response = userApi.getUserById(id)
                 _userState.value = ApiState.Success(response)
             }catch (e: Exception) {
                 _userState.value = ApiState.Error(e.message ?: "An unknown error occurred")

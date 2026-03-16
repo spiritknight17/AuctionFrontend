@@ -40,7 +40,7 @@ import java.util.Date
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
-
+import com.payamanan.auctionfrontend.viewModels.TransactionViewModel
 
 
 val InriaSerif = FontFamily(Font(R.font.inriaserifregular))
@@ -57,7 +57,7 @@ fun Home(navController: NavController,
     val items by itemViewModel.items.collectAsState()
     val auctions by auctionViewModel.auctions.collectAsState()
     val itemState by itemViewModel.itemState.collectAsState()
-    
+    val transactionViewModel: TransactionViewModel = viewModel()
 
     var showEditDialog by remember { mutableStateOf(false) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -268,6 +268,7 @@ fun Home(navController: NavController,
                 auction = selectedAuctionForDialog!!,
                 onDismiss = { showEndAuctionDialog = false },
                 onConfirm = {
+                    transactionViewModel.finalizeAuction(selectedAuctionForDialog!!)
                     showEndAuctionDialog = false
                 }
             )

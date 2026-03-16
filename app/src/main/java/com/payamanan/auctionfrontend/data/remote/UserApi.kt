@@ -15,5 +15,5 @@ interface UserApi {
     suspend fun login(@Body user: User) : User
 
     @GET("api/user/{id}")
-    suspend fun  get(@Path("id") id: Int) : User
+    suspend fun getUserById(@Path("id") id: Int): User
 }

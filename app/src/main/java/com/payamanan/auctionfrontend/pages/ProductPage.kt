@@ -37,10 +37,12 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun ProductPage(navController: NavController, auctionId: String? = null) {
+    val transactionViewModel: TransactionViewModel = viewModel()
     val auctionViewModel: AuctionViewModel = viewModel()
     LaunchedEffect(Unit) {
         auctionViewModel.getAuctions()
     }
+
     val auctions by auctionViewModel.auctions.collectAsState()
     if (auctions.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -49,7 +51,6 @@ fun ProductPage(navController: NavController, auctionId: String? = null) {
         return
     }
     val auction = auctions.find { it.id.toString() == auctionId }
-    val transactionViewModel: TransactionViewModel = viewModel()
     val user = UserSesssion.user
 
     if (auction == null) {

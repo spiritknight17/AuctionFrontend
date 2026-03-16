@@ -5,6 +5,7 @@ import com.payamanan.auctionfrontend.data.model.BidRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface AuctionApi {
@@ -14,6 +15,9 @@ interface AuctionApi {
 
     @POST("api/auction")
     suspend fun createAuction(@Body auction: Auction): Auction
+
+    @PUT("api/auction")
+    suspend fun updateAuction(@Body auction: Auction): Auction
 
     @POST("api/auction/{id}/bid")
     suspend fun bidAuction(@Path("id") id: Int, @Body bidRequest: BidRequest): String

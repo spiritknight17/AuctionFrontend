@@ -68,7 +68,7 @@ class AuctionViewModel: ViewModel() {
                     startingPrice = startingPrice,
                     currentBid = initialBid,
                     startTime = java.util.Date(),
-                    endTime = java.util.Date(System.currentTimeMillis() + 86400000),
+                    endTime = java.util.Date(System.currentTimeMillis() + 60000),
                     status = "Pending"
                 )
                 auctionApi.createAuction(newAuction)
