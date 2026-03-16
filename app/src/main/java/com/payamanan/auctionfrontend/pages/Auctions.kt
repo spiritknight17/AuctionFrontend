@@ -41,12 +41,18 @@ import com.payamanan.auctionfrontend.sharedComponents.ItemToAuction
 import com.payamanan.auctionfrontend.ui.theme.bottomBgColor
 import com.payamanan.auctionfrontend.ui.theme.goldText
 import com.payamanan.auctionfrontend.ui.theme.topBgColor
+import com.payamanan.auctionfrontend.viewModels.AuctionViewModel
 import com.payamanan.auctionfrontend.viewModels.ItemViewModel
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 
 val Interfont = FontFamily(Font(R.font.inter, FontWeight.Normal), Font(R.font.inter18ptbold, FontWeight.Bold))
 
 @Composable
-fun Auctions(navController: NavController) {
+fun Auctions(navController: NavController,
+             auctionViewModel: AuctionViewModel) {
+
     val scrollState = rememberScrollState()
     val viewModel: ItemViewModel = viewModel()
     val user = UserSesssion.user
@@ -161,6 +167,7 @@ fun Auctions(navController: NavController) {
     if (showAuctionDialog && selectedItem != null) {
         ItemToAuction(
             item = selectedItem!!,
+            viewModel = auctionViewModel,
             onDismiss = { showAuctionDialog = false }
         )
     }

@@ -69,10 +69,9 @@ class AuctionViewModel: ViewModel() {
                     currentBid = initialBid,
                     startTime = java.util.Date(),
                     endTime = java.util.Date(System.currentTimeMillis() + 86400000),
-                    status = "ACTIVE"
+                    status = "Pending"
                 )
                 auctionApi.createAuction(newAuction)
-                createAuction(newAuction)
                 getAuctions()
             } catch (e: Exception) {
                 Log.e("AuctionViewModel", "Failed to start auction: ${e.message}")

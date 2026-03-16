@@ -75,7 +75,7 @@ fun AuctionCard(auction: Auction, onBidClick: () -> Unit) {
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
                     modifier = Modifier.height(30.dp)
                 ) {
-                    Text(text = "Place a Bid", fontSize = 11.sp, color = Color.White)
+                    Text(text = "Place a Bid", fontSize = 11.sp, color = Color.Black)
                 }
             }
         }

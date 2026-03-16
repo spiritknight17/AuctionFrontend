@@ -17,4 +17,7 @@ interface AuctionApi {
 
     @POST("api/auction/{id}/bid")
     suspend fun bidAuction(@Path("id") id: Int, @Body bidRequest: BidRequest): String
+
+    @GET("api/auction/{id}")
+    suspend fun getAuction(@Path("id") id: Int): Auction
 }
