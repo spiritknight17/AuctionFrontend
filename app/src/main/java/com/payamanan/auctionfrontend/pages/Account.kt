@@ -164,7 +164,7 @@ fun Account(navController: NavController,
                 },
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(50.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF800020))
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8C4F4F))
             ) { Text("Log Out", color = Color.White, fontWeight = FontWeight.Bold) }
 
             Spacer(modifier = Modifier.height(40.dp))
