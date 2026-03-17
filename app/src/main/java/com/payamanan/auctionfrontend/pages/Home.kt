@@ -179,7 +179,7 @@ fun Home(navController: NavController,
                             showAddDialog = true
                         })
                     }
-                    
+
                     hostedAuctions.take(1).forEach { auction ->
                         Box(modifier = Modifier.weight(1f)) {
                             HostedAuctionCard(
@@ -260,16 +260,16 @@ fun Home(navController: NavController,
             )
         }
 
-        /*if (showEditDialog && selectedAuctionForDialog != null) {
-            AuctionFormDialog( // Ensure this still exists or update it to ItemFormDialog too
-                auction = selectedAuctionForDialog!!,
+        if (showEditDialog && selectedAuctionForDialog != null) {
+            AuctionFormDialog(
+                item = selectedAuctionForDialog!!.item,
                 onDismiss = { showEditDialog = false },
-                onConfirm = { updatedAuction ->
-                    auctionViewModel.createAuction(updatedAuction)
+                onConfirm = { updatedItem ->
+                    itemViewModel.updateItem(updatedItem)
                     showEditDialog = false
                 }
             )
-        }*/
+        }
 
         if (showEndAuctionDialog && selectedAuctionForDialog != null) {
             EndAuctionDialog(

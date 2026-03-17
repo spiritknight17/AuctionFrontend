@@ -32,6 +32,20 @@ class ItemViewModel : ViewModel() {
         }
     }
 
+    fun updateItem(item: Item) {
+        viewModelScope.launch {
+            _itemState.value = ApiState.Loading
+            try {
+                val id = item.id ?: return@launch
+                val response = itemApi.updateItem(id, item)
+                _itemState.value = ApiState.Success(response)
+                getItems()
+            } catch (e: Exception) {
+                _itemState.value = ApiState.Error(e.message ?: "An unknown error occurred")
+            }
+        }
+    }
+
     fun getItems() {
         viewModelScope.launch {
             try {

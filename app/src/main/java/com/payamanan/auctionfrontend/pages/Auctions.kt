@@ -73,6 +73,7 @@ fun Auctions(navController: NavController,
             .fillMaxSize()
             .background(bottomBgColor)
             .verticalScroll(scrollState)
+            .padding(bottom = 24.dp)
     ) {
         Column(
             modifier = Modifier

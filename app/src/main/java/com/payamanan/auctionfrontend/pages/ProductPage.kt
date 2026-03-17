@@ -23,7 +23,6 @@ import com.payamanan.auctionfrontend.data.UserSesssion
 import com.payamanan.auctionfrontend.data.UserSesssion.user
 import com.payamanan.auctionfrontend.data.model.Auction
 import com.payamanan.auctionfrontend.data.model.BidRequest
-import com.payamanan.auctionfrontend.data.model.Transaction
 import com.payamanan.auctionfrontend.ui.theme.DarkText
 import com.payamanan.auctionfrontend.ui.theme.GoldYellow
 import com.payamanan.auctionfrontend.ui.theme.LightGray
@@ -32,7 +31,6 @@ import com.payamanan.auctionfrontend.ui.theme.OliveGreen
 import com.payamanan.auctionfrontend.ui.theme.SubtleGray
 import com.payamanan.auctionfrontend.viewModels.AuctionViewModel
 import com.payamanan.auctionfrontend.viewModels.TransactionViewModel
-import kotlinx.coroutines.delay
 
 
 @Composable
@@ -80,40 +78,6 @@ fun ProductPage(navController: NavController, auctionId: String? = null) {
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "Time Left",
-                        color = OffWhite.copy(alpha = 0.80f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal
-                    )
-
-                    val endTime = auction.endTime.time
-                    var timeLeft by remember { mutableLongStateOf((endTime - System.currentTimeMillis()) / 1000) }
-
-                    LaunchedEffect(Unit) {
-                        while (timeLeft > 0) {
-                            delay(1000)
-                            timeLeft = (endTime - System.currentTimeMillis()) / 1000
-                        }
-                    }
-
-                    if (timeLeft > 0) {
-                        Text(
-                            text = "%02d:%02d:%02d".format(timeLeft / 3600, (timeLeft % 3600) / 60, timeLeft % 60),
-                            color = GoldYellow,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    } else {
-                        Text(
-                            text = "Auction Ended",
-                            color = GoldYellow,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
 
                 Box(modifier = Modifier.align(Alignment.CenterStart)) {
                     Box(

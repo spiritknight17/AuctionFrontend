@@ -49,10 +49,10 @@ fun TransactionHistoryCard(transaction: Transaction) {
                     color = Color.Black
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                
+
                 val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
-                val endDate = dateFormat.format(transaction.auction.endTime)
-                
+                val endDate = transaction.auction.endTime?.let { dateFormat.format(it) } ?: "—"
+
                 Text(
                     text = "Ended at $endDate",
                     fontFamily = Interfont,

@@ -51,7 +51,7 @@ fun HostedAuctionCard(
                     lineHeight = 16.sp
                 )
                 Text(
-                    text = "₱${auction.startingPrice}",
+                    text = "₱${auction.currentBid?.offeredPrice ?: auction.startingPrice}",
                     fontFamily = InterFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,

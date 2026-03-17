@@ -9,7 +9,7 @@ data class Auction(
     val startingPrice: Float,
     val currentBid: BidRequest?,
     val startTime: Date,
-    val endTime: Date,
+    val endTime: Date?,
     val status: String
 ){
     val hasValidBid: Boolean get() = currentBid != null
