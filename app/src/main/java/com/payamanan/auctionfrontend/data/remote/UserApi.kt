@@ -4,6 +4,7 @@ import com.payamanan.auctionfrontend.data.model.User
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface UserApi {
@@ -16,4 +17,7 @@ interface UserApi {
 
     @GET("api/user/{id}")
     suspend fun getUserById(@Path("id") id: Int): User
+
+    @PUT("api/user")
+    suspend fun updateUser(@Body user: User): User
 }

@@ -45,6 +45,19 @@ class UserViewModel: ViewModel() {
         }
     }
 
+    fun updateUser(user: User) {
+        viewModelScope.launch {
+            _userState.value = ApiState.Loading
+            try {
+                val response = userApi.updateUser(user)
+                _userState.value = ApiState.Success(response)
+                UserSesssion.user = response
+            } catch (e: Exception) {
+                _userState.value = ApiState.Error(e.message ?: "An unknown error occurred")
+            }
+        }
+    }
+
     fun getDetails(id: Int) {
         viewModelScope.launch {
             _userState.value = ApiState.Loading

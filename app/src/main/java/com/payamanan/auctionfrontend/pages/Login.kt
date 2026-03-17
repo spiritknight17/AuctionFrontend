@@ -25,13 +25,14 @@ import com.payamanan.auctionfrontend.R
 import com.payamanan.auctionfrontend.data.ApiState
 import com.payamanan.auctionfrontend.data.model.User
 import com.payamanan.auctionfrontend.viewModels.UserViewModel
+import android.util.Patterns
 
 @Composable
 fun Login(navController: NavController) {
     val userViewModel: UserViewModel = viewModel()
     val userState by userViewModel.userState.collectAsState()
 
-    var usernameOrEmail by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     // Custom state to hold validation/API error messages
@@ -47,7 +48,7 @@ fun Login(navController: NavController) {
             }
             is ApiState.Error -> {
                 // Override standard HTTP exception messages with a custom user-friendly error
-                localError = "Username/Email and Password do not match."
+                localError = "Invalid email or password."
                 userViewModel.resetState()
             }
             else -> {}
@@ -71,15 +72,15 @@ fun Login(navController: NavController) {
 
                     Text(text = "Login", modifier = Modifier.align(Alignment.CenterHorizontally), style = TextStyle(color = Color(0xFFB1822C), fontSize = 40.sp, fontFamily = InriaSerif, fontWeight = FontWeight.Bold))
 
-                    Text(text = "Username/Email", style = TextStyle(color = Color(0xFFB1822C), fontSize = 16.sp, fontFamily = Inter, fontWeight = FontWeight.Normal, textAlign = TextAlign.Left))
+                    Text(text = "Email", style = TextStyle(color = Color(0xFFB1822C), fontSize = 16.sp, fontFamily = Inter, fontWeight = FontWeight.Normal, textAlign = TextAlign.Left))
 
                     OutlinedTextField(
-                        value = usernameOrEmail,
+                        value = email,
                         onValueChange = {
-                            usernameOrEmail = it
+                            email = it
                             localError = "" // Clear error as user types
                         },
-                        placeholder = { Text("Enter Username/Email...", color = Color(0xFFB1822C).copy(alpha = 0.5f)) },
+                        placeholder = { Text("Enter Email...", color = Color(0xFFB1822C).copy(alpha = 0.5f)) },
                         shape = RoundedCornerShape(15.dp),
                         modifier = Modifier.fillMaxWidth(),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -129,17 +130,20 @@ fun Login(navController: NavController) {
 
                     Button(
                         onClick = {
-                            if (usernameOrEmail.isBlank() || password.isBlank()) {
+                            if (email.isBlank() || password.isBlank()) {
                                 localError = "Please fill in all fields."
                                 return@Button
                             }
 
-                            // Pass the input to both username and email properties
-                            // so the backend can validate it smoothly against the database
+                            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                                localError = "Please enter a valid email address."
+                                return@Button
+                            }
+
                             val user = User(
                                 userId = null,
-                                username = usernameOrEmail,
-                                email = usernameOrEmail,
+                                username = null,
+                                email = email,
                                 passwordHash = password,
                                 role = null,
                                 status = null

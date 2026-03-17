@@ -66,8 +66,17 @@ fun Home(navController: NavController,
     var selectedAuctionForDialog by remember { mutableStateOf<Auction?>(null) }
     val scrollState = rememberScrollState()
     var selectedTab by remember { mutableIntStateOf(1) }
+
     LaunchedEffect(Unit) {
         auctionViewModel.getAuctions()
+    }
+
+    LaunchedEffect(itemState) {
+        if (itemState is ApiState.Success) {
+            showAddDialog = false
+            itemViewModel.resetState()
+            auctionViewModel.getAuctions()
+        }
     }
 
     Scaffold(
@@ -159,7 +168,6 @@ fun Home(navController: NavController,
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .background(Color.Red)
                     ) {
                         AddItemCard(onClick = {
                             selectedItemForDialog = Item(
